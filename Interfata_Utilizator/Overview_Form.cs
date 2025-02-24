@@ -16,6 +16,7 @@ namespace PROIECT_CSD
         private void Overview_Form_Load(object sender, EventArgs e)
         {
             LoginDialog loginDiag = new LoginDialog();
+            Orchestrator._o = this;
 
             // amandoua apele ale functiei 'CenterToScreen' sunt necesare, deoarece pe mai
             // multe monitoare Screen.GetBounds nu este initial setat pe monitorul corect
