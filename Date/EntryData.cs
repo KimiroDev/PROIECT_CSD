@@ -10,12 +10,21 @@ namespace PROIECT_CSD.Date
     /// Clasa ce encapsuleaza datele pentru un fisier. Toate campurile sunt stringuri
     /// pentru ca e mai usor de transmis de la/spre baza de date.
     /// </summary>
-    public class EntryData
+    public struct EntryData
     {
-        public string FileName = "NULL";
-        public string FileFullPath = "NULL";
-        public string Encrypted = "false";
-        public string EncryptionKey = "NULL";
-        public string EncryptionAlgorithm = "NULL";
+        public string FileName;
+        public string FileFullPath;
+        public string Encrypted;
+        public string EncryptionKey;
+        public string EncryptionAlgorithm;
+
+        public EntryData()
+        {
+            FileName = "NULL";
+            FileFullPath = "NULL";
+            Encrypted = "false";
+            EncryptionKey = "NULL";
+            EncryptionAlgorithm = "NULL";
+        }
     }
 }

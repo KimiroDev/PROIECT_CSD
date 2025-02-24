@@ -1,6 +1,8 @@
+using PROIECT_CSD.Interfata_Utilizator;
+
 namespace PROIECT_CSD
 {
-    public partial class Overview_Form : Form
+    public partial class Overview_Form : Form, IOverview
     {
         public Overview_Form()
         {
@@ -20,6 +22,11 @@ namespace PROIECT_CSD
             // amandoua apele ale functiei 'CenterToScreen' sunt necesare, deoarece pe mai
             // multe monitoare Screen.GetBounds nu este initial setat pe monitorul corect
             CenterToScreen();
+        }
+
+        void IOverview.Refresh()
+        {
+            MessageBox.Show("IOverview.Refresh()", "Not implemented");
         }
     }
 }
