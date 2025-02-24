@@ -1,6 +1,6 @@
 ﻿namespace PROIECT_CSD
 {
-    partial class Form1
+    partial class Overview_Form
     {
         /// <summary>
         ///  Required designer variable.
@@ -37,7 +37,7 @@
             ClientSize = new Size(1187, 707);
             Name = "Form1";
             Text = "Form1";
-            Load += Form1_Load;
+            Load += Overview_Form_Load;
             ResumeLayout(false);
         }
 
