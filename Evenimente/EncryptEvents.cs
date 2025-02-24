@@ -17,9 +17,9 @@ namespace PROIECT_CSD.Evenimente
         /// </summary>
         /// <param name="item">Entry- ul de adaugat in baza de date sau idk unde.</param>
         /// <returns>true daca s-a putut adauga, false altfel</returns>
-        static public bool AddEntry_ButtonPressed(EntryData item)
+        static public bool EncryptButtonPressed(EntryData item, string alg, string key)
         {
-            return true;
+            return false;
         }
     }
 }

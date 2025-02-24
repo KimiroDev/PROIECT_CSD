@@ -17,6 +17,7 @@ namespace PROIECT_CSD.Date
         public string Encrypted;
         public string EncryptionKey;
         public string EncryptionAlgorithm;
+        public string Duration;
 
         public EntryData()
         {
@@ -25,6 +26,7 @@ namespace PROIECT_CSD.Date
             Encrypted = "false";
             EncryptionKey = "NULL";
             EncryptionAlgorithm = "NULL";
+            Duration = "NULL";
         }
     }
 }
