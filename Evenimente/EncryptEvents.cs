@@ -21,5 +21,14 @@ namespace PROIECT_CSD.Evenimente
         {
             return false;
         }
+
+        /// <summary>
+        /// S-a apasat butonul de adaugare din prompt-ul de adaugare entry.
+        /// </summary>
+        /// <param name="item">Entry- ul de adaugat in baza de date sau idk unde.</param>
+        /// <returns>true daca s-a putut adauga, false altfel</returns>
+        static public void DecryptButtonPressed(EntryData item)
+        {
+        }
     }
 }
