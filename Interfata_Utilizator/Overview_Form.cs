@@ -45,6 +45,10 @@ namespace PROIECT_CSD
             RefreshListItems();
 
             loginDiag.Dispose();
+
+
+            // 
+            Evenimente.Evenimente.GenTESTdatabase();
         }
 
         /// <summary>
@@ -90,6 +94,8 @@ namespace PROIECT_CSD
         /// <param name="e"></param>
         private void EncryptButton_Click(object? sender, EventArgs e)
         {
+            if (EntryList.SelectedItems.Count != 1) return;
+
             ListViewItem item = EntryList.SelectedItems[0];
 
             EntryData selectedfile = new()
@@ -116,6 +122,8 @@ namespace PROIECT_CSD
         /// <param name="e"></param>
         private void DecryptButton_Click(object? sender, EventArgs e)
         {
+            if (EntryList.SelectedItems.Count != 1) return;
+
             ListViewItem item = EntryList.SelectedItems[0];
 
             EntryData selectedfile = new()
@@ -184,8 +192,10 @@ namespace PROIECT_CSD
         /// <param name="e"></param>
         private void DeleteButton_Click(object sender, EventArgs e)
         {
+            // item ul selectat
             ListViewItem item = EntryList.SelectedItems[0];
 
+            // colectam datele despre fisierul pe care il vrem sters
             EntryData selectedfile = new()
             {
                 FileName = item.SubItems[0].Text,
@@ -196,15 +206,29 @@ namespace PROIECT_CSD
                 FileFullPath = item.SubItems[5].Text,
             };
 
+            // prompt pentru confirmare stergere
             DialogResult res = MessageBox.Show(
                 "Are you sure you want to delete '" + selectedfile.FileName + "'?", "", MessageBoxButtons.YesNo
             );
 
+            // incercam sa stergem fisierul
             if (res == DialogResult.Yes)
             {
                 if (!Evenimente.Evenimente.DeleteFile(selectedfile))
                     MessageBox.Show("Could not delete file", "Error");
             }
+        }
+
+        void IOverview.AddTempEntry(EntryData entry)
+        {
+            ListViewItem item = new(entry.FileName);
+            item.SubItems.Add(entry.Encrypted);
+            item.SubItems.Add(entry.EncryptionKey);
+            item.SubItems.Add(entry.EncryptionAlgorithm);
+            item.SubItems.Add(entry.Duration);
+            item.SubItems.Add(entry.FileFullPath);
+
+            EntryList.Items.Add(item);
         }
     }
 }

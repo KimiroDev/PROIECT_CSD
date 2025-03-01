@@ -1,14 +1,81 @@
 ﻿using PROIECT_CSD.Date;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+using Microsoft.Data.Sqlite;
+using System.Diagnostics;
 
 namespace PROIECT_CSD.Evenimente
 {
     static public partial class Evenimente
     {
+        /// <summary>
+        /// Generate table and random contents to be queried then deleted
+        /// Am facut eu de test asa
+        /// </summary>
+        /// <returns></returns>
+        static public List<EntryData> GenTESTdatabase()
+        {
+            // creare baza de date
+            string dbPath = Path.Combine(Directory.GetCurrentDirectory(), "..\\..\\..\\");
+            dbPath = Path.Combine(dbPath, "Baze_de_date\\hello.db");
+            string connectionString = $"Data Source={dbPath};";
+
+            using (var connection = new SqliteConnection(connectionString))
+            {
+                // conectare la aceasta
+                connection.Open();
+
+                var command = connection.CreateCommand();
+                command.CommandText = @"
+CREATE TABLE IF NOT EXISTS FILES (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,  -- Unique ID for each file (optional)
+    file_name TEXT NOT NULL,               -- File name
+    encrypted BOOLEAN NOT NULL,            -- True (1) or False (0) for encryption status
+    key_string TEXT,                        -- Encryption key (if applicable)
+    algorithm TEXT,                         -- Encryption algorithm
+    duration INTEGER,                       -- Duration (in seconds or another unit)
+    full_path TEXT NOT NULL                 -- Full path of the file
+);";
+
+                command.ExecuteNonQuery();
+                Console.WriteLine("Table created.");
+
+                // init date random
+                string[] fileNames = { "file1", "file2", "file3", "file4", "file5" };
+                string[] algorithms = { "AES-256", "RSA-2048", "ChaCha20", "AES-128", "RSA-1024" };
+
+                // adaug entry uri
+                for (int i = 0; i < 5; i++)
+                {
+                    string fileName = fileNames[random.Next(fileNames.Length)];
+                    bool encrypted = random.Next(2) == 1; // True (1) or False (0)
+                    string keyString = encrypted ? Guid.NewGuid().ToString("N").Substring(0, 16) : "-"; // Random 16-char key
+                    string algorithm = encrypted ? algorithms[random.Next(algorithms.Length)] : "-";
+                    int duration = encrypted ? random.Next(10, 1000) : 0; // Random duration between 10 and 1000
+                    string fullPath = $"/path/to/{fileName}";
+
+                    using (var command2 = connection.CreateCommand())
+                    {
+                        command2.CommandText = "INSERT INTO FILES (file_name, encrypted, key_string, algorithm, duration, full_path) " +
+                           "VALUES (@fileName, @encrypted, @keyString, @algorithm, @duration, @fullPath)";
+
+                        command2.Parameters.AddWithValue("@fileName", fileName);
+                        command2.Parameters.AddWithValue("@encrypted", encrypted);
+                        command2.Parameters.AddWithValue("@keyString", keyString);
+                        command2.Parameters.AddWithValue("@algorithm", algorithm);
+                        command2.Parameters.AddWithValue("@duration", duration);
+
+                        if (encrypted) fullPath += ".enc";
+                        else fullPath += ".pdf";
+                            command2.Parameters.AddWithValue("@fullPath", fullPath);
+
+                        command2.ExecuteNonQuery();
+                    }
+                }
+
+            }
+
+            return [];
+        }
+
         /// <summary>
         /// DE FACUT
         /// Ia datele despre fisiere din baza de date si le pune intr-o lista de `EntryData`.
@@ -17,46 +84,61 @@ namespace PROIECT_CSD.Evenimente
         /// <returns></returns>
         static public List<EntryData> GetFilesFromDatabase(string user)
         {
+            List<EntryData> list = [];
+            string dbPath = Path.Combine(Directory.GetCurrentDirectory(), "..\\..\\..\\");
+            dbPath = Path.Combine(dbPath, "Baze_de_date\\hello.db");
+            string connectionString = $"Data Source={dbPath};";
 
-            // ...
-
-            List<EntryData> files = [];
-
-            EntryData placeholder1 = new()
+            using (var connection3 = new SqliteConnection(connectionString))
             {
-                FileName = "fisier",
-                Encrypted = "true",
-                EncryptionAlgorithm = "SHA256",
-                EncryptionKey = RandomString(10),
-                Duration = "12",
-                FileFullPath = "C:\\Users\\student\\Desktop\\fisier.enc",
-            };
+                connection3.Open();
 
-            EntryData placeholder2 = new()
-            {
-                FileName = "parole",
-                Encrypted = "false",
-                EncryptionAlgorithm = "-",
-                EncryptionKey = "-",
-                Duration = "-",
-                FileFullPath = "C:\\Users\\student\\Desktop\\parole.txt",
-            };
+                string selectQuery = "SELECT id, file_name, encrypted, key_string, algorithm, duration, full_path FROM FILES;";
 
-            EntryData placeholder3 = new()
-            {
-                FileName = "retetacrabbypatty",
-                Encrypted = "true",
-                EncryptionAlgorithm = "RA",
-                EncryptionKey = RandomString(10),
-                Duration = "409",
-                FileFullPath = "C:\\Users\\student\\Desktop\\retetacrabbypatty.enc",
-            };
+                using (var command3 = connection3.CreateCommand())
+                {
+                    command3.CommandText = selectQuery;
+                    using (var reader = command3.ExecuteReader())
+                    {
+                        Debug.WriteLine("ID | File Name | Encrypted | Key String | Algorithm | Duration | Full Path");
+                        Debug.WriteLine("------------------------------------------------------------");
 
-            files.Add(placeholder1);
-            files.Add(placeholder2);
-            files.Add(placeholder3);
+                        try
+                        {
 
-            return files;
+                            while (reader.Read())
+                            {
+                                int id = reader.GetInt32(0);
+                                string fileName = reader.GetString(1);
+                                bool encrypted = reader.GetBoolean(2);
+                                string keyString = reader.GetString(3);
+                                string algorithm = reader.GetString(4);
+                                int duration = reader.GetInt32(5);
+                                string fullPath = reader.GetString(6);
+
+                                // Display the data
+                                Debug.WriteLine($"{id} | {fileName} | {encrypted} | {keyString} | {algorithm} | {duration} | {fullPath}");
+
+                                EntryData entry = new()
+                                {
+                                    FileName = fileName,
+                                    Encrypted = encrypted ? "true" : "false",
+                                    EncryptionKey = keyString,
+                                    EncryptionAlgorithm = algorithm,
+                                    Duration = duration.ToString(),
+                                    FileFullPath = fullPath
+                                };
+
+                                //Orchestrator.AddTemporaryEntry(entry);
+                                list.Add(entry);
+                            }
+                        }
+                        catch (Exception e) { MessageBox.Show(e.StackTrace, "Eroare la baza de date"); }
+                    }
+                }
+            }
+
+            return list;
         }
 
         /// <summary>

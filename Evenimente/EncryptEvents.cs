@@ -1,9 +1,5 @@
 ﻿using PROIECT_CSD.Date;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+
 
 namespace PROIECT_CSD.Evenimente
 {
@@ -19,6 +15,7 @@ namespace PROIECT_CSD.Evenimente
         /// <returns>true daca s-a putut adauga, false altfel</returns>
         static public bool EncryptButtonPressed(EntryData item, string alg, string key)
         {
+            Orchestrator.RefreshOverViewTable();
             return false;
         }
 
@@ -29,6 +26,7 @@ namespace PROIECT_CSD.Evenimente
         /// <returns>true daca s-a putut adauga, false altfel</returns>
         static public void DecryptButtonPressed(EntryData item)
         {
+            Orchestrator.RefreshOverViewTable();
         }
     }
 }

@@ -67,9 +67,9 @@
             IsEncryptedColumn.Width = 70;
             // 
             // KeyColumn
-            // 
+            //  
             KeyColumn.Text = "Key";
-            KeyColumn.Width = 130;
+            KeyColumn.Width = 130; 
             // 
             // AlgColumn
             // 
