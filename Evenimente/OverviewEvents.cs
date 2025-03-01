@@ -150,7 +150,7 @@ CREATE TABLE IF NOT EXISTS FILES (
             // ...
 
             // modificare cu succes
-            return -1;
+            return 0;
         }
 
         /// <summary>
