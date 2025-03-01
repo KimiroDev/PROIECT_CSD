@@ -67,9 +67,9 @@
             IsEncryptedColumn.Width = 70;
             // 
             // KeyColumn
-            //  
+            // 
             KeyColumn.Text = "Key";
-            KeyColumn.Width = 130; 
+            KeyColumn.Width = 130;
             // 
             // AlgColumn
             // 
@@ -135,7 +135,7 @@
             ModifyButton.Name = "ModifyButton";
             ModifyButton.Size = new Size(75, 23);
             ModifyButton.TabIndex = 5;
-            ModifyButton.Text = "Modify";
+            ModifyButton.Text = "Edit";
             ModifyButton.UseVisualStyleBackColor = true;
             ModifyButton.Click += ModifyButton_Click;
             // 

@@ -181,8 +181,24 @@ namespace PROIECT_CSD
         /// <param name="sender"></param>
         /// <param name="e"></param>
         private void ModifyButton_Click(object sender, EventArgs e)
-        {
-            MessageBox.Show("Error", "Inca nam facut form u asta");
+        { 
+            if (EntryList.SelectedItems.Count != 1) return;
+
+            ListViewItem item = EntryList.SelectedItems[0];
+
+            EntryData selectedfile = new()
+            {
+                FileName = item.SubItems[0].Text,
+                Encrypted = item.SubItems[1].Text,
+                EncryptionKey = item.SubItems[2].Text,
+                EncryptionAlgorithm = item.SubItems[3].Text,
+                Duration = item.SubItems[4].Text,
+                FileFullPath = item.SubItems[5].Text,
+            };
+
+            EntryEditForm editform = new(selectedfile);
+            editform.ShowDialog();
+            RefreshListItems();
         }
 
         /// <summary>

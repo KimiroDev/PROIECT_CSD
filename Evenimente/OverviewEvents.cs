@@ -142,6 +142,18 @@ CREATE TABLE IF NOT EXISTS FILES (
         }
 
         /// <summary>
+        /// DE FACUT modificare fisier 
+        /// </summary>
+        /// <returns></returns>
+        static public int EditEntry(EntryData entry)
+        {
+            // ...
+
+            // modificare cu succes
+            return -1;
+        }
+
+        /// <summary>
         /// DE FACUT logare.
         /// </summary>
         /// <returns>2 strings representing the name of the user and type 'regular' or 'admin' or 'null' if login fails.</returns>
