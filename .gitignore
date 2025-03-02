@@ -362,3 +362,5 @@ MigrationBackup/
 # Fody - auto-generated XML schema
 FodyWeavers.xsd
 /Baze_de_date/hello.db
+/hello2.db
+/hello.db
