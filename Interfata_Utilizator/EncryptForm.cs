@@ -24,7 +24,7 @@ namespace PROIECT_CSD.Interfata_Utilizator
                 Close();
             }
 
-            if (Evenimente.Evenimente.EncryptButtonPressed(FileData, AlgLabel.Text, comboBox1.Text))
+            if (Evenimente.Evenimente.EncryptButtonPressed(FileData, comboBox1.Text, textBox1.Text))
             {
                 Text = "Encrypt File - Success";
                 EncryptButton.Text = "Close";

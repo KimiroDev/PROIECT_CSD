@@ -39,7 +39,7 @@ CREATE TABLE IF NOT EXISTS FILES (
                 Console.WriteLine("Table created.");
 
                 // init date random
-                string[] fileNames = { "file1", "file2", "file3", "file4", "file5" };
+                string[] fileNames = { "pinar.txt", "pinar.txt", "pinar.txt", "pinar.txt", "pinar.txt" };
                 string[] algorithms = { "AES-256", "RSA-2048", "ChaCha20", "AES-128", "RSA-1024" };
 
                 // adaug entry uri
@@ -50,7 +50,7 @@ CREATE TABLE IF NOT EXISTS FILES (
                     string keyString = encrypted ? Guid.NewGuid().ToString("N").Substring(0, 16) : "-"; // Random 16-char key
                     string algorithm = encrypted ? algorithms[random.Next(algorithms.Length)] : "-";
                     int duration = encrypted ? random.Next(10, 1000) : 0; // Random duration between 10 and 1000
-                    string fullPath = $"/path/to/{fileName}";
+                    string fullPath = $"D:\\AC\\An4\\CSD\\files\\{fileName}";
 
                     using (var command2 = connection.CreateCommand())
                     {
@@ -64,7 +64,6 @@ CREATE TABLE IF NOT EXISTS FILES (
                         command2.Parameters.AddWithValue("@duration", duration);
 
                         if (encrypted) fullPath += ".enc";
-                        else fullPath += ".pdf";
                             command2.Parameters.AddWithValue("@fullPath", fullPath);
 
                         command2.ExecuteNonQuery();
@@ -173,7 +172,8 @@ CREATE TABLE IF NOT EXISTS FILES (
         static public void AddNewFile(string filepath)
         {
 
-            // ...
+            // ... erich
+
 
             Orchestrator.RefreshOverViewTable();
         }
