@@ -42,13 +42,13 @@ namespace PROIECT_CSD
             UserTypeLabel.Text = UserType == "admin" ? "Admin" : "Regular user";
 
             // Display entries (files)
+            Evenimente.Evenimente.GenTESTdatabase();
             RefreshListItems();
 
             loginDiag.Dispose();
 
 
             // 
-            Evenimente.Evenimente.GenTESTdatabase();
         }
 
         /// <summary>
@@ -84,7 +84,14 @@ namespace PROIECT_CSD
         /// <param name="e"></param>
         private void AddFileButton_Click(object sender, EventArgs e)
         {
-            Evenimente.Evenimente.AddNewFile();
+            OpenFileDialog dialog = new();
+            DialogResult result = dialog.ShowDialog();
+
+            if (result == DialogResult.OK && !string.IsNullOrWhiteSpace(dialog.FileName))
+            {
+                Evenimente.Evenimente.AddNewFile(dialog.FileName);
+
+            }
         }
 
         /// <summary>

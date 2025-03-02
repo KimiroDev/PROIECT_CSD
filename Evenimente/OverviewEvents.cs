@@ -11,11 +11,11 @@ namespace PROIECT_CSD.Evenimente
         /// Am facut eu de test asa
         /// </summary>
         /// <returns></returns>
-        static public List<EntryData> GenTESTdatabase()
+        static public void GenTESTdatabase()
         {
             // creare baza de date
             string dbPath = Path.Combine(Directory.GetCurrentDirectory(), "..\\..\\..\\");
-            dbPath = Path.Combine(dbPath, "Baze_de_date\\hello.db");
+            dbPath = Path.Combine(dbPath, "hello.db");
             string connectionString = $"Data Source={dbPath};";
 
             using (var connection = new SqliteConnection(connectionString))
@@ -70,10 +70,7 @@ CREATE TABLE IF NOT EXISTS FILES (
                         command2.ExecuteNonQuery();
                     }
                 }
-
             }
-
-            return [];
         }
 
         /// <summary>
@@ -86,7 +83,7 @@ CREATE TABLE IF NOT EXISTS FILES (
         {
             List<EntryData> list = [];
             string dbPath = Path.Combine(Directory.GetCurrentDirectory(), "..\\..\\..\\");
-            dbPath = Path.Combine(dbPath, "Baze_de_date\\hello.db");
+            dbPath = Path.Combine(dbPath, "hello.db");
             string connectionString = $"Data Source={dbPath};";
 
             using (var connection3 = new SqliteConnection(connectionString))
@@ -173,7 +170,7 @@ CREATE TABLE IF NOT EXISTS FILES (
         /// APELATI ORCHESTRATOR.REFRESH SA SE REFLECTE SCHIMBAREA PE FORM
         /// Functia apelata de butonul 'Add File'.
         /// </summary>
-        static public void AddNewFile()
+        static public void AddNewFile(string filepath)
         {
 
             // ...
