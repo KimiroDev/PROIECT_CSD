@@ -115,7 +115,7 @@ namespace PROIECT_CSD
                 FileFullPath = item.SubItems[5].Text,
             };
 
-            EncryptForm encryptForm = new();
+            EncryptForm encryptForm = new(selectedfile);
             if (encryptForm.ShowDialog() == DialogResult.OK)
             {
                 Refresh();
