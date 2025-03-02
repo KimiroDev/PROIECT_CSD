@@ -1,3 +1,5 @@
+using PROIECT_CSD.Interfata_Utilizator;
+
 namespace PROIECT_CSD
 {
     internal static class Program
@@ -11,7 +13,7 @@ namespace PROIECT_CSD
             // To customize application configuration such as set high DPI settings or default font,
             // see https://aka.ms/applicationconfiguration.
             ApplicationConfiguration.Initialize();
-            Application.Run(new Overview_Form());
+            Application.Run(new LoginDialog());
         }
     }
 }

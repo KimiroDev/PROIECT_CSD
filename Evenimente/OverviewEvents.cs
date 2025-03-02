@@ -36,7 +36,7 @@ CREATE TABLE IF NOT EXISTS FILES (
 );";
 
                 command.ExecuteNonQuery();
-                Console.WriteLine("Table created.");
+                Debug.WriteLine("Table created.");
 
                 // init date random
                 string[] fileNames = { "pinar.txt", "pinar.txt", "pinar.txt", "pinar.txt", "pinar.txt" };
@@ -174,8 +174,6 @@ CREATE TABLE IF NOT EXISTS FILES (
 
             // ... erich
 
-
-            Orchestrator.RefreshOverViewTable();
         }
 
         /// <summary>

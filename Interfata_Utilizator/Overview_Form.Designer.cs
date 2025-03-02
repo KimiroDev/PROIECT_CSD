@@ -41,6 +41,9 @@
             EncryptButton = new Button();
             ModifyButton = new Button();
             DeleteButton = new Button();
+            btnLogout = new Button();
+            tableLayoutPanel1 = new TableLayoutPanel();
+            tableLayoutPanel1.SuspendLayout();
             SuspendLayout();
             // 
             // EntryList
@@ -88,21 +91,25 @@
             // 
             // UserTypeLabel
             // 
+            UserTypeLabel.Anchor = AnchorStyles.Top | AnchorStyles.Right;
             UserTypeLabel.AutoSize = true;
-            UserTypeLabel.Location = new Point(12, 9);
+            UserTypeLabel.Location = new Point(133, 0);
             UserTypeLabel.Name = "UserTypeLabel";
             UserTypeLabel.Size = new Size(27, 15);
             UserTypeLabel.TabIndex = 1;
             UserTypeLabel.Text = "null";
+            UserTypeLabel.TextAlign = ContentAlignment.MiddleRight;
             // 
             // UserNameLabel
             // 
+            UserNameLabel.Anchor = AnchorStyles.Top | AnchorStyles.Right;
             UserNameLabel.AutoSize = true;
-            UserNameLabel.Location = new Point(12, 24);
+            UserNameLabel.Location = new Point(133, 20);
             UserNameLabel.Name = "UserNameLabel";
             UserNameLabel.Size = new Size(27, 15);
             UserNameLabel.TabIndex = 2;
             UserNameLabel.Text = "null";
+            UserNameLabel.TextAlign = ContentAlignment.MiddleRight;
             // 
             // AddFileButton
             // 
@@ -151,23 +158,50 @@
             DeleteButton.UseVisualStyleBackColor = true;
             DeleteButton.Click += DeleteButton_Click;
             // 
+            // btnLogout
+            // 
+            btnLogout.Anchor = AnchorStyles.Top | AnchorStyles.Right;
+            btnLogout.Location = new Point(862, 12);
+            btnLogout.Name = "btnLogout";
+            btnLogout.Size = new Size(75, 23);
+            btnLogout.TabIndex = 7;
+            btnLogout.Text = "Logout";
+            btnLogout.UseVisualStyleBackColor = true;
+            btnLogout.Click += BtnLogout_Click;
+            // 
+            // tableLayoutPanel1
+            // 
+            tableLayoutPanel1.Anchor = AnchorStyles.Top | AnchorStyles.Right;
+            tableLayoutPanel1.ColumnCount = 1;
+            tableLayoutPanel1.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 50F));
+            tableLayoutPanel1.Controls.Add(UserTypeLabel, 0, 0);
+            tableLayoutPanel1.Controls.Add(UserNameLabel, 0, 1);
+            tableLayoutPanel1.Location = new Point(693, 2);
+            tableLayoutPanel1.Name = "tableLayoutPanel1";
+            tableLayoutPanel1.RightToLeft = RightToLeft.No;
+            tableLayoutPanel1.RowCount = 2;
+            tableLayoutPanel1.RowStyles.Add(new RowStyle(SizeType.Percent, 50F));
+            tableLayoutPanel1.RowStyles.Add(new RowStyle(SizeType.Percent, 50F));
+            tableLayoutPanel1.Size = new Size(163, 40);
+            tableLayoutPanel1.TabIndex = 8;
+            // 
             // Overview_Form
             // 
             AutoScaleDimensions = new SizeF(7F, 15F);
             AutoScaleMode = AutoScaleMode.Font;
             ClientSize = new Size(949, 451);
+            Controls.Add(tableLayoutPanel1);
+            Controls.Add(btnLogout);
             Controls.Add(DeleteButton);
             Controls.Add(ModifyButton);
             Controls.Add(EncryptButton);
             Controls.Add(AddFileButton);
-            Controls.Add(UserNameLabel);
-            Controls.Add(UserTypeLabel);
             Controls.Add(EntryList);
             Name = "Overview_Form";
-            Text = "Form1";
-            Load += Overview_Form_Load;
+            Text = "set automatically";
+            tableLayoutPanel1.ResumeLayout(false);
+            tableLayoutPanel1.PerformLayout();
             ResumeLayout(false);
-            PerformLayout();
         }
 
         #endregion
@@ -185,5 +219,7 @@
         private ColumnHeader AlgColumn;
         private ColumnHeader DurationColumn;
         private ColumnHeader PathColumn;
+        private Button btnLogout;
+        private TableLayoutPanel tableLayoutPanel1;
     }
 }

@@ -37,8 +37,34 @@ namespace PROIECT_CSD.Interfata_Utilizator
             {
                 User = user.uname;
                 UserType = user.utype;
-                DialogResult = DialogResult.OK;
-                Close();
+
+                LoginTextBox.Text = "";
+                PasswordTextBox.Text = "";
+
+                if (UserType == "regular")
+                {
+                    Hide();
+                    Overview_Form newform = new(User, UserType);
+                    newform.ShowDialog();
+
+                    if (newform.DialogResult == DialogResult.Cancel)
+                        Close();
+                    else
+                        Show();
+                }
+                else
+                {
+                    Hide();
+                    AdminForm newform = new(User, UserType);
+                    newform.ShowDialog();
+
+                    if (newform.DialogResult == DialogResult.Cancel)
+                        Close();
+                    else 
+                        Show();
+                }
+                //DialogResult = DialogResult.OK;
+                //Close();
             }
         }
     }

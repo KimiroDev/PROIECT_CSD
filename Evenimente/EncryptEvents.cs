@@ -13,10 +13,10 @@ namespace PROIECT_CSD.Evenimente
         /// </summary>
         /// <param name="item">Entry- ul de adaugat in baza de date sau idk unde.</param>
         /// <returns>true daca s-a putut adauga, false altfel</returns>
-        static public bool EncryptButtonPressed(EntryData item, string alg, string key)
+        static public int EncryptButtonPressed(EntryData item, string alg, string key)
         {
-            Orchestrator.RefreshOverViewTable();
-            return false;
+
+            return -1;
         }
 
         /// <summary>
@@ -24,9 +24,9 @@ namespace PROIECT_CSD.Evenimente
         /// </summary>
         /// <param name="item">Entry- ul de adaugat in baza de date sau idk unde.</param>
         /// <returns>true daca s-a putut adauga, false altfel</returns>
-        static public void DecryptButtonPressed(EntryData item)
+        static public int DecryptButtonPressed(EntryData item)
         {
-            Orchestrator.RefreshOverViewTable();
+            return -1;
         }
     }
 }

@@ -3,20 +3,11 @@ using PROIECT_CSD.Interfata_Utilizator;
 
 namespace PROIECT_CSD
 {
-    public partial class Overview_Form : Form, IOverview
+    public partial class Overview_Form : Form
     {
-        public Overview_Form()
+        public Overview_Form(string username, string usertype)
         {
             InitializeComponent();
-        }
-
-        private string User;
-        private string UserType;
-
-        private void Overview_Form_Load(object sender, EventArgs e)
-        {
-            LoginDialog loginDiag = new LoginDialog();
-            Orchestrator._o = this;
 
             // amandoua apele ale functiei 'CenterToScreen' sunt necesare, deoarece pe mai
             // multe monitoare Screen.GetBounds nu este initial setat pe monitorul corect
@@ -30,31 +21,23 @@ namespace PROIECT_CSD
             // multe monitoare Screen.GetBounds nu este initial setat pe monitorul corect
             CenterToScreen();
 
-            // Do Login
-            if (loginDiag.ShowDialog(this) != DialogResult.OK) Close();
-
-            User = loginDiag.User;
-            UserType = loginDiag.UserType;
-            Text = User + "'s files";
-
-            // Display user info
+            // afis info utilizator
+            User = username;
+            UserType = usertype;
             UserNameLabel.Text = User;
             UserTypeLabel.Text = UserType == "admin" ? "Admin" : "Regular user";
+            Text = User + "'s files";
 
-            // Display entries (files)
+            // genereaza si afiseaza fisiere exemplu
+            // (mai incolo doar afisare)
             Evenimente.Evenimente.GenTESTdatabase();
             RefreshListItems();
 
-            loginDiag.Dispose();
-
-
-            // 
+            DialogResult = DialogResult.Continue;
         }
 
-        /// <summary>
-        /// Ia date despre fisierele utilizatorului din baza de date si le afiseaza pe ecran.
-        /// </summary>
-        void IOverview.Refresh() => RefreshListItems();
+        private string User;
+        private string UserType;
 
         /// <summary>
         /// Ia date despre fisierele utilizatorului din baza de date si le afiseaza pe ecran.
@@ -90,7 +73,7 @@ namespace PROIECT_CSD
             if (result == DialogResult.OK && !string.IsNullOrWhiteSpace(dialog.FileName))
             {
                 Evenimente.Evenimente.AddNewFile(dialog.FileName);
-
+                RefreshListItems();
             }
         }
 
@@ -118,7 +101,7 @@ namespace PROIECT_CSD
             EncryptForm encryptForm = new(selectedfile);
             if (encryptForm.ShowDialog() == DialogResult.OK)
             {
-                Refresh();
+                RefreshListItems();
             }
         }
 
@@ -143,9 +126,12 @@ namespace PROIECT_CSD
                 FileFullPath = item.SubItems[5].Text,
             };
 
-            Evenimente.Evenimente.DecryptButtonPressed(selectedfile);
+            int result = Evenimente.Evenimente.DecryptButtonPressed(selectedfile);
 
-            Refresh();
+            if (result != 0)
+                MessageBox.Show($"Decryption was unsuccessful. Error code {result}", "Error");
+
+            RefreshListItems();
         }
 
         /// <summary>
@@ -171,13 +157,15 @@ namespace PROIECT_CSD
                 {
                     EncryptButton.Text = "Decrypt";
                     EncryptButton.Click -= EncryptButton_Click;
+                    EncryptButton.Click -= DecryptButton_Click;
                     EncryptButton.Click += DecryptButton_Click;
                 }
                 else
                 {
                     EncryptButton.Text = "Encrypt";
-                    EncryptButton.Click += EncryptButton_Click;
+                    EncryptButton.Click -= EncryptButton_Click;
                     EncryptButton.Click -= DecryptButton_Click;
+                    EncryptButton.Click += EncryptButton_Click;
                 }
             }
         }
@@ -188,7 +176,7 @@ namespace PROIECT_CSD
         /// <param name="sender"></param>
         /// <param name="e"></param>
         private void ModifyButton_Click(object sender, EventArgs e)
-        { 
+        {
             if (EntryList.SelectedItems.Count != 1) return;
 
             ListViewItem item = EntryList.SelectedItems[0];
@@ -242,16 +230,15 @@ namespace PROIECT_CSD
             }
         }
 
-        void IOverview.AddTempEntry(EntryData entry)
+        /// <summary>
+        /// Logout event.
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
+        private void BtnLogout_Click(object sender, EventArgs e)
         {
-            ListViewItem item = new(entry.FileName);
-            item.SubItems.Add(entry.Encrypted);
-            item.SubItems.Add(entry.EncryptionKey);
-            item.SubItems.Add(entry.EncryptionAlgorithm);
-            item.SubItems.Add(entry.Duration);
-            item.SubItems.Add(entry.FileFullPath);
-
-            EntryList.Items.Add(item);
+            DialogResult = DialogResult.Continue;
+            Close();
         }
     }
 }
