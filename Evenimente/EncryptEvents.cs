@@ -15,7 +15,7 @@ namespace PROIECT_CSD.Evenimente
         /// <returns>true daca s-a putut adauga, false altfel</returns>
         static public int EncryptButtonPressed(EntryData item, string alg, string key)
         {
-
+            //trb lui victor
             return -1;
         }
 

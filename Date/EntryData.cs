@@ -18,6 +18,7 @@ namespace PROIECT_CSD.Date
         public string EncryptionKey;
         public string EncryptionAlgorithm;
         public string Duration;
+        public string Reversable;
 
         public EntryData()
         {
@@ -27,6 +28,7 @@ namespace PROIECT_CSD.Date
             EncryptionKey = "NULL";
             EncryptionAlgorithm = "NULL";
             Duration = "NULL";
+            Reversable = "NULL";
         }
     }
 }

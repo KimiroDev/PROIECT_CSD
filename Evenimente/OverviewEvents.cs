@@ -1,76 +1,14 @@
 ﻿using PROIECT_CSD.Date;
 using Microsoft.Data.Sqlite;
 using System.Diagnostics;
+using System.Collections.Generic;
+using System.Security.Policy;
+using Microsoft.VisualBasic.ApplicationServices;
 
 namespace PROIECT_CSD.Evenimente
 {
     static public partial class Evenimente
     {
-        /// <summary>
-        /// Generate table and random contents to be queried then deleted
-        /// Am facut eu de test asa
-        /// </summary>
-        /// <returns></returns>
-        static public void GenTESTdatabase()
-        {
-            // creare baza de date
-            string dbPath = Path.Combine(Directory.GetCurrentDirectory(), "..\\..\\..\\");
-            dbPath = Path.Combine(dbPath, "hello.db");
-            string connectionString = $"Data Source={dbPath};";
-
-            using (var connection = new SqliteConnection(connectionString))
-            {
-                // conectare la aceasta
-                connection.Open();
-
-                var command = connection.CreateCommand();
-                command.CommandText = @"
-CREATE TABLE IF NOT EXISTS FILES (
-    id INTEGER PRIMARY KEY AUTOINCREMENT,  -- Unique ID for each file (optional)
-    file_name TEXT NOT NULL,               -- File name
-    encrypted BOOLEAN NOT NULL,            -- True (1) or False (0) for encryption status
-    key_string TEXT,                        -- Encryption key (if applicable)
-    algorithm TEXT,                         -- Encryption algorithm
-    duration INTEGER,                       -- Duration (in seconds or another unit)
-    full_path TEXT NOT NULL                 -- Full path of the file
-);";
-
-                command.ExecuteNonQuery();
-                Debug.WriteLine("Table created.");
-
-                // init date random
-                string[] fileNames = { "pinar.txt", "pinar.txt", "pinar.txt", "pinar.txt", "pinar.txt" };
-                string[] algorithms = { "AES-256", "RSA-2048", "ChaCha20", "AES-128", "RSA-1024" };
-
-                // adaug entry uri
-                for (int i = 0; i < 5; i++)
-                {
-                    string fileName = fileNames[random.Next(fileNames.Length)];
-                    bool encrypted = random.Next(2) == 1; // True (1) or False (0)
-                    string keyString = encrypted ? Guid.NewGuid().ToString("N").Substring(0, 16) : "-"; // Random 16-char key
-                    string algorithm = encrypted ? algorithms[random.Next(algorithms.Length)] : "-";
-                    int duration = encrypted ? random.Next(10, 1000) : 0; // Random duration between 10 and 1000
-                    string fullPath = $"D:\\AC\\An4\\CSD\\files\\{fileName}";
-
-                    using (var command2 = connection.CreateCommand())
-                    {
-                        command2.CommandText = "INSERT INTO FILES (file_name, encrypted, key_string, algorithm, duration, full_path) " +
-                           "VALUES (@fileName, @encrypted, @keyString, @algorithm, @duration, @fullPath)";
-
-                        command2.Parameters.AddWithValue("@fileName", fileName);
-                        command2.Parameters.AddWithValue("@encrypted", encrypted);
-                        command2.Parameters.AddWithValue("@keyString", keyString);
-                        command2.Parameters.AddWithValue("@algorithm", algorithm);
-                        command2.Parameters.AddWithValue("@duration", duration);
-
-                        if (encrypted) fullPath += ".enc";
-                            command2.Parameters.AddWithValue("@fullPath", fullPath);
-
-                        command2.ExecuteNonQuery();
-                    }
-                }
-            }
-        }
 
         /// <summary>
         /// DE FACUT
@@ -89,14 +27,18 @@ CREATE TABLE IF NOT EXISTS FILES (
             {
                 connection3.Open();
 
-                string selectQuery = "SELECT id, file_name, encrypted, key_string, algorithm, duration, full_path FROM FILES;";
+                string selectQuery = "SELECT algos.name, algos.isReversable, files.FileName, performances.Duration, performances.KeyUsed, performances.ResultIsEncrypted " +
+                    "FROM algos JOIN performances ON algos.ID = performances.AlgoIDUsed " +
+                    "JOIN files ON files.Hash = performances.HashOfFileNameUsed " +
+                    "JOIN users ON users.ID = files.UserIDWhoAdded " +
+                    "WHERE users.ID = 2; -- Change '2' to the desired UserID";
 
                 using (var command3 = connection3.CreateCommand())
                 {
                     command3.CommandText = selectQuery;
                     using (var reader = command3.ExecuteReader())
                     {
-                        Debug.WriteLine("ID | File Name | Encrypted | Key String | Algorithm | Duration | Full Path");
+                        Debug.WriteLine("File Name | Algo used | output encrypted | Key | can be reversed | Duration");
                         Debug.WriteLine("------------------------------------------------------------");
 
                         try
@@ -104,16 +46,16 @@ CREATE TABLE IF NOT EXISTS FILES (
 
                             while (reader.Read())
                             {
-                                int id = reader.GetInt32(0);
-                                string fileName = reader.GetString(1);
-                                bool encrypted = reader.GetBoolean(2);
-                                string keyString = reader.GetString(3);
-                                string algorithm = reader.GetString(4);
-                                int duration = reader.GetInt32(5);
-                                string fullPath = reader.GetString(6);
+                                string algorithm = reader.GetString(1);
+                                bool reversable = reader.GetBoolean(2);
+                                string fileName = reader.GetString(3);
+                                int duration = reader.GetInt32(4);
+                                string keyString = reader.GetString(5);
+                                bool encrypted = reader.GetBoolean(6);
+                                
 
                                 // Display the data
-                                Debug.WriteLine($"{id} | {fileName} | {encrypted} | {keyString} | {algorithm} | {duration} | {fullPath}");
+                                Debug.WriteLine($"{fileName} | {algorithm} | {encrypted} | {keyString} | {reversable} | {duration}");
 
                                 EntryData entry = new()
                                 {
@@ -122,7 +64,7 @@ CREATE TABLE IF NOT EXISTS FILES (
                                     EncryptionKey = keyString,
                                     EncryptionAlgorithm = algorithm,
                                     Duration = duration.ToString(),
-                                    FileFullPath = fullPath
+                                    Reversable = reversable.ToString(),
                                 };
 
                                 //Orchestrator.AddTemporaryEntry(entry);
@@ -157,10 +99,48 @@ CREATE TABLE IF NOT EXISTS FILES (
         {
 
             // ...
-
             (string, string) placeholder = ("Piratu", "null");
             if (passwd == "r") placeholder.Item2 = "regular";
             if (passwd == "a") placeholder.Item2 = "admin";
+            //todo erich: cand se introduce un user si parola, se verifica BD pentru a slava userID-ul 
+            //pt upload
+            /*
+            string dbPath = Path.Combine(Directory.GetCurrentDirectory(), "..\\..\\..\\");
+            dbPath = Path.Combine(dbPath, "hello.db");
+            string connectionString = $"Data Source={dbPath};";
+
+            using (var connection = new SqliteConnection(connectionString))
+            {
+                // conectare la baza de date
+                connection.Open();
+                using (var connection2 = new SqliteConnection(connectionString))
+                {
+                    connection2.Open();
+
+                    using (var command2 = connection2.CreateCommand())
+                    {
+                        //check daca file exista sau nu
+                        //...
+                        command2.CommandText = "INSERT INTO FILES (`FileName`, `DateAdded`, `UserIDWhoAdded`, `Hash`) " +
+                            "VALUES (@filename, @dateadded, @useridwhoadded, @hash);";
+
+                        command2.Parameters.AddWithValue("@filename", filepath);
+                        command2.Parameters.AddWithValue("@dateadded", DateTime.Now.ToString());
+                        command2.Parameters.AddWithValue("@useridwhoadded", "");
+
+                        try
+                        {
+                            command2.ExecuteNonQuery();
+                            Console.WriteLine($"File '{filepath}' added successfully.");
+                        }
+                        catch (SqliteException ex)
+                        {
+                            Console.WriteLine($"Error: {ex.ToString()}");
+                        }
+                    }
+                }
+            }
+            */
             return placeholder;
         }
 
@@ -171,9 +151,41 @@ CREATE TABLE IF NOT EXISTS FILES (
         /// </summary>
         static public void AddNewFile(string filepath)
         {
+            string dbPath = Path.Combine(Directory.GetCurrentDirectory(), "..\\..\\..\\");
+            dbPath = Path.Combine(dbPath, "hello.db");
+            string connectionString = $"Data Source={dbPath};";
 
-            // ... erich
+            using (var connection = new SqliteConnection(connectionString))
+            {
+                // conectare la baza de date
+                connection.Open();
+                using (var connection2 = new SqliteConnection(connectionString))
+                {
+                    connection2.Open();
 
+                    using (var command2 = connection2.CreateCommand())
+                    {
+                        //check daca file exista sau nu
+                        //...
+                        command2.CommandText = "INSERT INTO FILES (`FileName`, `DateAdded`, `UserIDWhoAdded`, `Hash`) " +
+                            "VALUES (@filename, @dateadded, @useridwhoadded, @hash);";
+                        
+                        command2.Parameters.AddWithValue("@filename", filepath);
+                        command2.Parameters.AddWithValue("@dateadded", DateTime.Now.ToString());
+                        command2.Parameters.AddWithValue("@useridwhoadded", "");
+
+                        try
+                        {
+                            command2.ExecuteNonQuery();
+                            Console.WriteLine($"File '{filepath}' added successfully.");
+                        }
+                        catch (SqliteException ex)
+                        {
+                            Console.WriteLine($"Error: {ex.ToString()}");
+                        }
+                    }
+                }
+            }
         }
 
         /// <summary>
@@ -184,7 +196,7 @@ CREATE TABLE IF NOT EXISTS FILES (
         /// <returns></returns>
         static public bool DeleteFile(EntryData file)
         {
-            
+
             // ...
 
             return false;
