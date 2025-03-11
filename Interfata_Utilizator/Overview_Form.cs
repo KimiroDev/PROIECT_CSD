@@ -30,7 +30,7 @@ namespace PROIECT_CSD
 
             // genereaza si afiseaza fisiere exemplu
             // (mai incolo doar afisare)
-            //Evenimente.Evenimente.GenTESTdatabase();
+            Evenimente.Evenimente.GenTESTdatabase();
             RefreshListItems();
 
             DialogResult = DialogResult.Continue;
