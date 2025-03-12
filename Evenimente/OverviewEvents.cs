@@ -18,67 +18,69 @@ namespace PROIECT_CSD.Evenimente
         /// <returns></returns>
         static public List<EntryData> GetFilesFromDatabase(string user)
         {
-            List<EntryData> list = [];
-            string dbPath = Path.Combine(Directory.GetCurrentDirectory(), "..\\..\\..\\");
-            dbPath = Path.Combine(dbPath, "hello.db");
+            List<EntryData> list = new List<EntryData>();
+            string dbPath = Path.Combine(Directory.GetCurrentDirectory(), "..\\..\\..\\hello.db");
             string connectionString = $"Data Source={dbPath};";
 
-            using (var connection3 = new SqliteConnection(connectionString))
+            using (SqliteConnection connection3 = new SqliteConnection(connectionString))
             {
                 connection3.Open();
 
-                
                 string selectQuery = "SELECT algos.name, algos.isReversable, files.FileName, performances.Duration, performances.KeyUsed, performances.ResultIsEncrypted " +
-                    "FROM algos JOIN performances ON algos.ID = performances.AlgoIDUsed " +
-                    "JOIN files ON files.Hash = performances.HashOfFileNameUsed " +
-                    "JOIN users ON users.ID = files.UserIDWhoAdded " +
-                    "WHERE users.ID = 2; -- Change '2' to the desired UserID";
-                
-                using (var command3 = connection3.CreateCommand())
+                                     "FROM algos " +
+                                     "JOIN performances ON algos.ID = performances.AlgoIDUsed " +
+                                     "JOIN files ON files.Hash = performances.HashOfFileNameUsed " +
+                                     "JOIN users ON users.ID = files.UserIDWhoAdded " +
+                                     "WHERE users.Name = @userName;";
+
+                using var command3 = connection3.CreateCommand();
+                command3.CommandText = selectQuery;
+                command3.Parameters.AddWithValue("@userName", user);
+
+                // Debugging output for the SQL query
+                Debug.WriteLine("Executing SQL: " + command3.CommandText);
+
+                using var reader = command3.ExecuteReader();
+                Debug.WriteLine("File Name | Algo used | output encrypted | Key | can be reversed | Duration");
+                Debug.WriteLine("------------------------------------------------------------");
+
+                try
                 {
-                    command3.CommandText = selectQuery;
-                    using (var reader = command3.ExecuteReader())
+                    while (reader.Read())
                     {
-                        Debug.WriteLine("File Name | Algo used | output encrypted | Key | can be reversed | Duration");
-                        Debug.WriteLine("------------------------------------------------------------");
+                        string algorithm = reader.GetString(0);
+                        bool reversable = reader.GetBoolean(1);
+                        string fileName = reader.GetString(2);
+                        int duration = reader.GetInt32(3);
+                        string keyString = reader.GetString(4);
+                        bool encrypted = reader.GetBoolean(5);
 
-                        try
+                        // Display the data
+                        Debug.WriteLine($"{fileName} | {algorithm} | {encrypted} | {keyString} | {reversable} | {duration}");
+
+                        EntryData entry = new EntryData
                         {
+                            FileName = fileName,
+                            Encrypted = encrypted ? "true" : "false",
+                            EncryptionKey = keyString,
+                            EncryptionAlgorithm = algorithm,
+                            Duration = duration.ToString(),
+                            Reversable = reversable.ToString(),
+                        };
 
-                            while (reader.Read())
-                            {
-                                string algorithm = reader.GetString(1);
-                                bool reversable = reader.GetBoolean(2);
-                                string fileName = reader.GetString(3);
-                                int duration = reader.GetInt32(4);
-                                string keyString = reader.GetString(5);
-                                bool encrypted = reader.GetBoolean(6);
-                                
-
-                                // Display the data
-                                Debug.WriteLine($"{fileName} | {algorithm} | {encrypted} | {keyString} | {reversable} | {duration}");
-
-                                EntryData entry = new()
-                                {
-                                    FileName = fileName,
-                                    Encrypted = encrypted ? "true" : "false",
-                                    EncryptionKey = keyString,
-                                    EncryptionAlgorithm = algorithm,
-                                    Duration = duration.ToString(),
-                                    Reversable = reversable.ToString(),
-                                };
-
-                                //Orchestrator.AddTemporaryEntry(entry);
-                                list.Add(entry);
-                            }
-                        }
-                        catch (Exception e) { MessageBox.Show(e.StackTrace, "Eroare la baza de date"); }
+                        list.Add(entry);
                     }
+                }
+                catch (Exception e)
+                {
+                    MessageBox.Show(e.Message + "\n" + e.StackTrace, "Database Error");
                 }
             }
 
             return list;
         }
+
+
 
         /// <summary>
         /// DE FACUT modificare fisier 
@@ -145,6 +147,27 @@ namespace PROIECT_CSD.Evenimente
             return placeholder;
         }
 
+        static public int? GetUserIdByName(string userName)
+        {
+            string dbPath = Path.Combine(Directory.GetCurrentDirectory(), "..\\..\\..\\");
+            dbPath = Path.Combine(dbPath, "hello.db");
+            string connectionString = $"Data Source={dbPath};";
+
+            using (var connection = new SqliteConnection(connectionString))
+            {
+                connection.Open();
+
+                using (var command = connection.CreateCommand())
+                {
+                    command.CommandText = "SELECT ID FROM USERS WHERE Name = @username;";
+                    command.Parameters.AddWithValue("@username", userName);
+
+                    object result = command.ExecuteScalar();
+                    return result != null ? Convert.ToInt32(result) : (int?)null;
+                }
+            }
+        }
+
         /// <summary>
         /// DE FACUT
         /// APELATI ORCHESTRATOR.REFRESH SA SE REFLECTE SCHIMBAREA PE FORM
@@ -158,40 +181,58 @@ namespace PROIECT_CSD.Evenimente
 
             using (var connection = new SqliteConnection(connectionString))
             {
-                // conectare la baza de date
                 connection.Open();
-                using (var connection2 = new SqliteConnection(connectionString))
+
+                // 1️⃣ Check if user exists
+                using (var checkUserCmd = connection.CreateCommand())
                 {
-                    connection2.Open();
-
-                    using (var command2 = connection2.CreateCommand())
+                    checkUserCmd.CommandText = "SELECT COUNT(*) FROM USERS WHERE ID = @userID;";
+                    checkUserCmd.Parameters.AddWithValue("@userID", GetUserIdByName("Piratu"));
+                    long count = (long)checkUserCmd.ExecuteScalar();
+                    if (count == 0)
                     {
-                        //check daca file exista sau nu
-                        //...
-                        command2.CommandText = "INSERT INTO FILES (`FileName`, `DateAdded`, `UserIDWhoAdded`, `Hash`) " +
-                            "VALUES (@filename, @dateadded, @useridwhoadded, @hash);";
-                        
-                        command2.Parameters.AddWithValue("@filename", filepath);
-                        string datetimeString = DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss");
-                        //Debug.WriteLine(datetimeString);
-                        command2.Parameters.AddWithValue("@dateadded", datetimeString);
-                        command2.Parameters.AddWithValue("@useridwhoadded", 1);
-                        command2.Parameters.AddWithValue("@hash", RandomString(filepath.Length));
+                        Console.WriteLine("Error: User with ID 1 does not exist!");
+                        return;
+                    }
+                }
 
-                        try
-                        {
-                            command2.ExecuteNonQuery();
-                            Debug.WriteLine($"File '{filepath}' added successfully.");
+                // 2️⃣ Check if file already exists
+                using (var checkFileCmd = connection.CreateCommand())
+                {
+                    checkFileCmd.CommandText = "SELECT COUNT(*) FROM FILES WHERE FileName = @filename;";
+                    checkFileCmd.Parameters.AddWithValue("@filename", filepath);
+                    long fileCount = (long)checkFileCmd.ExecuteScalar();
+                    if (fileCount > 0)
+                    {
+                        Console.WriteLine($"Error: File '{filepath}' already exists in the database.");
+                        return;
+                    }
+                }
 
-                        }
-                        catch (SqliteException ex)
-                        {
-                            Console.WriteLine($"Error: {ex.ToString()}");
-                        }
+                // 3️⃣ Insert new file
+                using (var command = connection.CreateCommand())
+                {
+                    command.CommandText = "INSERT INTO FILES (`FileName`, `DateAdded`, `UserIDWhoAdded`, `Hash`) " +
+                                          "VALUES (@filename, @dateadded, @useridwhoadded, @hash);";
+
+                    command.Parameters.AddWithValue("@filename", filepath);
+                    command.Parameters.AddWithValue("@dateadded", DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss"));
+                    command.Parameters.AddWithValue("@useridwhoadded", 1);
+                    command.Parameters.AddWithValue("@hash", RandomString(filepath.Length));
+
+                    try
+                    {
+                        command.ExecuteNonQuery();
+                        Debug.WriteLine($"File '{filepath}' added successfully.");
+                    }
+                    catch (SqliteException ex)
+                    {
+                        Console.WriteLine($"Error: {ex.Message}");
                     }
                 }
             }
         }
+
 
         /// <summary>
         /// DE FACUT
