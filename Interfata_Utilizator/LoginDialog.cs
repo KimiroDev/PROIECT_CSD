@@ -20,7 +20,8 @@ namespace PROIECT_CSD.Interfata_Utilizator
             User = "null";
             UserType = "null";
             InitializeComponent();
-
+            Evenimente.Evenimente.GenTESTdatabase();
+            Evenimente.Evenimente.TEST_AdaugaUtilizatoriRandom();
             CenterToParent();
             AcceptButton = LoginButton;
         }

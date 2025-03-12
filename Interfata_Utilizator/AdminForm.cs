@@ -33,8 +33,6 @@ namespace PROIECT_CSD.Interfata_Utilizator
             Text = UserName + "'s files";
 
             DialogResult = DialogResult.Continue;
-            Evenimente.Evenimente.GenTESTdatabase();
-            Evenimente.Evenimente.TEST_AdaugaUtilizatoriRandom();
             RefreshListItems();
         }
 

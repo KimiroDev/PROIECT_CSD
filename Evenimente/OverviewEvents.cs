@@ -27,12 +27,13 @@ namespace PROIECT_CSD.Evenimente
             {
                 connection3.Open();
 
+                
                 string selectQuery = "SELECT algos.name, algos.isReversable, files.FileName, performances.Duration, performances.KeyUsed, performances.ResultIsEncrypted " +
                     "FROM algos JOIN performances ON algos.ID = performances.AlgoIDUsed " +
                     "JOIN files ON files.Hash = performances.HashOfFileNameUsed " +
                     "JOIN users ON users.ID = files.UserIDWhoAdded " +
                     "WHERE users.ID = 2; -- Change '2' to the desired UserID";
-
+                
                 using (var command3 = connection3.CreateCommand())
                 {
                     command3.CommandText = selectQuery;
@@ -171,13 +172,17 @@ namespace PROIECT_CSD.Evenimente
                             "VALUES (@filename, @dateadded, @useridwhoadded, @hash);";
                         
                         command2.Parameters.AddWithValue("@filename", filepath);
-                        command2.Parameters.AddWithValue("@dateadded", DateTime.Now.ToString());
-                        command2.Parameters.AddWithValue("@useridwhoadded", "");
+                        string datetimeString = DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss");
+                        //Debug.WriteLine(datetimeString);
+                        command2.Parameters.AddWithValue("@dateadded", datetimeString);
+                        command2.Parameters.AddWithValue("@useridwhoadded", 1);
+                        command2.Parameters.AddWithValue("@hash", RandomString(filepath.Length));
 
                         try
                         {
                             command2.ExecuteNonQuery();
-                            Console.WriteLine($"File '{filepath}' added successfully.");
+                            Debug.WriteLine($"File '{filepath}' added successfully.");
+
                         }
                         catch (SqliteException ex)
                         {
