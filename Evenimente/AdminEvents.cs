@@ -20,58 +20,84 @@ namespace PROIECT_CSD.Evenimente
 
             using (var connection = new SqliteConnection(connectionString))
             {
-                // conectare la aceasta
                 connection.Open();
-
                 var command = connection.CreateCommand();
+
+                // hai las asa ca merge bine
+                command.CommandText = "PRAGMA foreign_keys = OFF;";
+                command.ExecuteNonQuery();
+
                 command.CommandText = @"
-                CREATE TABLE IF NOT EXISTS USERS (
-	            `ID` INTEGER PRIMARY KEY AUTOINCREMENT, -- Unique ID for each user
-	            `IsAdmin` BOOLEAN NOT NULL, 
-	            `Name` VARCHAR(50) NULL DEFAULT NULL,
-	            `PassHash` VARCHAR(50) NULL DEFAULT NULL
-                );";
+        DROP TABLE IF EXISTS USERS;
+        DROP TABLE IF EXISTS FILES;
+        DROP TABLE IF EXISTS ALGOS;
+        DROP TABLE IF EXISTS PERFORMANCES;";
+                command.ExecuteNonQuery();
+                Debug.WriteLine("Existing tables dropped.");
+
+                // punem inapoi 
+                command.CommandText = "PRAGMA foreign_keys = ON;";
+                command.ExecuteNonQuery();
+
+                // adauga tabele de test
+                command.CommandText = @"
+        CREATE TABLE IF NOT EXISTS USERS (
+        `ID` INTEGER PRIMARY KEY AUTOINCREMENT, 
+        `IsAdmin` BOOLEAN NOT NULL, 
+        `Name` VARCHAR(50) UNIQUE NOT NULL,
+        `PassHash` VARCHAR(50) NULL DEFAULT NULL
+        );";
                 command.ExecuteNonQuery();
                 Debug.WriteLine("'Users' table created.");
 
                 command.CommandText = @"
-                CREATE TABLE IF NOT EXISTS FILES (
-	            `FileName` CHAR(50) NULL DEFAULT NULL,
-	            `DateAdded` DATETIME NULL DEFAULT NULL,
-	            `UserIDWhoAdded` INTEGER NULL DEFAULT NULL,
-	            `Hash` VARCHAR(50) NULL DEFAULT NULL
-                );";
-
+CREATE TABLE IF NOT EXISTS FILES (
+    `FileName` CHAR(50) NOT NULL,
+    `DateAdded` DATETIME NOT NULL,
+    `UserIDWhoAdded` INTEGER NOT NULL,
+    `Hash` VARCHAR(50) NOT NULL UNIQUE, -- FIX: Ensuring 'Hash' is UNIQUE
+    FOREIGN KEY(UserIDWhoAdded) REFERENCES USERS(ID)
+);";
                 command.ExecuteNonQuery();
                 Debug.WriteLine("'Files' table created.");
 
                 command.CommandText = @"
-                CREATE TABLE IF NOT EXISTS ALGOS (
-	            `ID` INTEGER PRIMARY KEY AUTOINCREMENT,
-	            `isReversable` BOOLEAN NOT NULL,
-	            `name` VARCHAR(50) NULL DEFAULT NULL
-                );";
-
+        CREATE TABLE IF NOT EXISTS ALGOS (
+        `ID` INTEGER PRIMARY KEY AUTOINCREMENT,
+        `isReversable` BOOLEAN NOT NULL,
+        `name` VARCHAR(50) NULL DEFAULT NULL
+        );";
                 command.ExecuteNonQuery();
                 Debug.WriteLine("'Algos' table created.");
 
                 command.CommandText = @"
-                CREATE TABLE IF NOT EXISTS PERFORMANCES (
-	            `AlgoIDUsed` INTEGER NULL DEFAULT NULL,
-	            `HashOfFileNameUsed` VARCHAR(50) NULL DEFAULT NULL,
-	            `Duration` DOUBLE NULL DEFAULT NULL,
-	            `KeyUsed` VARCHAR(50) NULL DEFAULT NULL,
-	            `ResultIsEncrypted` BOOLEAN NOT NULL
-                );";
-
+        CREATE TABLE IF NOT EXISTS PERFORMANCES (
+        `AlgoIDUsed` INTEGER NOT NULL,
+        `HashOfFileNameUsed` VARCHAR(50) NOT NULL,
+        `Duration` DOUBLE NOT NULL,
+        `KeyUsed` VARCHAR(50) NULL,
+        `ResultIsEncrypted` BOOLEAN NOT NULL,
+        FOREIGN KEY(AlgoIDUsed) REFERENCES ALGOS(ID),
+        FOREIGN KEY(HashOfFileNameUsed) REFERENCES FILES(Hash)
+        );";
                 command.ExecuteNonQuery();
-                Debug.WriteLine("'performances' table created.");
+                Debug.WriteLine("'Performances' table created.");
 
-                // init date random
-                string[] fileNames = { "pinar.txt", "pinar.txt", "pinar.txt", "pinar.txt", "pinar.txt" };
+                command.CommandText = @"
+        INSERT INTO USERS (IsAdmin, Name, PassHash) 
+        VALUES (0, 'Piratu', 'somehashedpassword');";
+                command.ExecuteNonQuery();
+                Debug.WriteLine("User 'Piratu' added.");
+
+                command.CommandText = "SELECT ID FROM USERS WHERE Name = 'Piratu';";
+                int piratuUserID = Convert.ToInt32(command.ExecuteScalar());
+                Debug.WriteLine($"User 'Piratu' has ID: {piratuUserID}");
+
+                string[] fileNames = { "pinar.txt", "secret.doc", "data.csv", "notes.pdf", "report.txt" };
                 string[] algorithms = { "AES-256", "RSA-2048", "ChaCha20", "AES-128", "RSA-1024" };
 
-                // adaug entry uri
+                Random random = new Random();
+
                 for (int i = 0; i < 5; i++)
                 {
                     string fileName = fileNames[random.Next(fileNames.Length)];
@@ -81,37 +107,39 @@ namespace PROIECT_CSD.Evenimente
                     int duration = encrypted ? random.Next(10, 1000) : 0; // Random duration between 10 and 1000
                     string randomHash = RandomString(3);
                     int randomUserID = random.Next(3);
+                    int randomUserID = random.Next(3);
                     using (var command2 = connection.CreateCommand())
                     {
-                        //inserari fileuri
-
-                        command2.CommandText = "INSERT INTO FILES (`FileName`, `DateAdded`, `UserIDWhoAdded`, `Hash`) " +
-                            "VALUES(@fileName, @dateadded, @useridwhoadded, @hash);";
-
+                        command2.CommandText = "INSERT INTO FILES (FileName, DateAdded, UserIDWhoAdded, Hash) " +
+                                               "VALUES (@fileName, @dateAdded, @userID, @hash);";
                         command2.Parameters.AddWithValue("@fileName", fileName);
-                        command2.Parameters.AddWithValue("@dateadded", "2025-02-27 20:32:53");
-                        command2.Parameters.AddWithValue("@useridwhoadded", randomUserID);
-                        command2.Parameters.AddWithValue("@hash", randomHash);
-
-
-                        //inserari algoritmi
-                        command2.CommandText = "INSERT INTO ALGOS (`isReversable`, `name`) " +
-                            "VALUES (@isreversable, @algoname);";
-
-                        command2.Parameters.AddWithValue("@isreversable", encrypted);
-                        command2.Parameters.AddWithValue("@algoname", algorithm);
-
-                        /*
-                        if (encrypted) fullPath += ".enc";
-                        command2.Parameters.AddWithValue("@fullPath", fullPath);
-                        */
-
+                        command2.Parameters.AddWithValue("@dateAdded", DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss"));
+                        command2.Parameters.AddWithValue("@userID", piratuUserID);
+                        command2.Parameters.AddWithValue("@hash", fileHash);
                         command2.ExecuteNonQuery();
 
+                        command2.CommandText = "INSERT INTO ALGOS (isReversable, name) VALUES (@isReversable, @algoName);";
+                        command2.Parameters.AddWithValue("@isReversable", encrypted);
+                        command2.Parameters.AddWithValue("@algoName", algorithm);
+                        command2.ExecuteNonQuery();
+
+                        command2.CommandText = "SELECT last_insert_rowid();";
+                        int algoID = Convert.ToInt32(command2.ExecuteScalar());
+
+                        command2.CommandText = "INSERT INTO PERFORMANCES (AlgoIDUsed, HashOfFileNameUsed, Duration, KeyUsed, ResultIsEncrypted) " +
+                                               "VALUES (@algoID, @hash, @duration, @keyUsed, @encrypted);";
+                        command2.Parameters.AddWithValue("@algoID", algoID);
+                        command2.Parameters.AddWithValue("@duration", duration);
+                        command2.Parameters.AddWithValue("@keyUsed", keyString);
+                        command2.Parameters.AddWithValue("@encrypted", encrypted);
+                        command2.ExecuteNonQuery();
                     }
                 }
+
+                Debug.WriteLine("Test database initialized with user 'Piratu' and some files.");
             }
         }
+
         static public void TEST_AdaugaUtilizatoriRandom()
         {
             // creare baza de date

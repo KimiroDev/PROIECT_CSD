@@ -79,15 +79,15 @@ namespace PROIECT_CSD.Evenimente
                                 // Display the data
                                 Debug.WriteLine($"{fileName} | {encrypted} | {keyString} | {algorithm} | {duration} | {reversable}");
 
-                                EntryData entry = new()
-                                {
-                                    FileName = fileName,
-                                    Encrypted = encrypted ? "true" : "false",
-                                    EncryptionKey = keyString,
-                                    EncryptionAlgorithm = algorithm,
-                                    Duration = duration.ToString(),
-                                    Reversable = reversable.ToString(),
-                                };
+                        EntryData entry = new EntryData
+                        {
+                            FileName = fileName,
+                            Encrypted = encrypted ? "true" : "false",
+                            EncryptionKey = keyString,
+                            EncryptionAlgorithm = algorithm,
+                            Duration = duration.ToString(),
+                            Reversable = reversable.ToString(),
+                        };
 
                                 list.Add(entry);
                             }
@@ -102,6 +102,8 @@ namespace PROIECT_CSD.Evenimente
 
             return list;
         }
+
+
 
         /// <summary>
         /// DE FACUT modificare fisier 
@@ -184,6 +186,27 @@ namespace PROIECT_CSD.Evenimente
             }
 
             return userInfo;
+        }
+
+        static public int? GetUserIdByName(string userName)
+        {
+            string dbPath = Path.Combine(Directory.GetCurrentDirectory(), "..\\..\\..\\");
+            dbPath = Path.Combine(dbPath, "hello.db");
+            string connectionString = $"Data Source={dbPath};";
+
+            using (var connection = new SqliteConnection(connectionString))
+            {
+                connection.Open();
+
+                using (var command = connection.CreateCommand())
+                {
+                    command.CommandText = "SELECT ID FROM USERS WHERE Name = @username;";
+                    command.Parameters.AddWithValue("@username", userName);
+
+                    object result = command.ExecuteScalar();
+                    return result != null ? Convert.ToInt32(result) : (int?)null;
+                }
+            }
         }
 
         /// <summary>
@@ -280,25 +303,44 @@ namespace PROIECT_CSD.Evenimente
 
             using (var connection = new SqliteConnection(connectionString))
             {
-                // conectare la baza de date
                 connection.Open();
-                using (var connection2 = new SqliteConnection(connectionString))
-                {
-                    connection2.Open();
 
-                    using (var command2 = connection2.CreateCommand())
+                // 1️⃣ Check if user exists
+                using (var checkUserCmd = connection.CreateCommand())
+                {
+                    checkUserCmd.CommandText = "SELECT COUNT(*) FROM USERS WHERE ID = @userID;";
+                    checkUserCmd.Parameters.AddWithValue("@userID", GetUserIdByName("Piratu"));
+                    long count = (long)checkUserCmd.ExecuteScalar();
+                    if (count == 0)
                     {
-                        //check daca file exista sau nu
-                        //...
-                        command2.CommandText = "INSERT INTO FILES (`FileName`, `DateAdded`, `UserIDWhoAdded`, `Hash`) " +
-                            "VALUES (@filename, @dateadded, @useridwhoadded, @hash);";
-                        
-                        command2.Parameters.AddWithValue("@filename", filepath);
-                        string datetimeString = DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss");
-                        //Debug.WriteLine(datetimeString);
-                        command2.Parameters.AddWithValue("@dateadded", datetimeString);
-                        command2.Parameters.AddWithValue("@useridwhoadded", 1);
-                        command2.Parameters.AddWithValue("@hash", RandomString(filepath.Length));
+                        Console.WriteLine("Error: User with ID 1 does not exist!");
+                        return;
+                    }
+                }
+
+                // 2️⃣ Check if file already exists
+                using (var checkFileCmd = connection.CreateCommand())
+                {
+                    checkFileCmd.CommandText = "SELECT COUNT(*) FROM FILES WHERE FileName = @filename;";
+                    checkFileCmd.Parameters.AddWithValue("@filename", filepath);
+                    long fileCount = (long)checkFileCmd.ExecuteScalar();
+                    if (fileCount > 0)
+                    {
+                        Console.WriteLine($"Error: File '{filepath}' already exists in the database.");
+                        return;
+                    }
+                }
+
+                // 3️⃣ Insert new file
+                using (var command = connection.CreateCommand())
+                {
+                    command.CommandText = "INSERT INTO FILES (`FileName`, `DateAdded`, `UserIDWhoAdded`, `Hash`) " +
+                                          "VALUES (@filename, @dateadded, @useridwhoadded, @hash);";
+
+                    command.Parameters.AddWithValue("@filename", filepath);
+                    command.Parameters.AddWithValue("@dateadded", DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss"));
+                    command.Parameters.AddWithValue("@useridwhoadded", 1);
+                    command.Parameters.AddWithValue("@hash", RandomString(filepath.Length));
 
                         try
                         {
@@ -315,6 +357,7 @@ namespace PROIECT_CSD.Evenimente
             }
         }
         */
+
 
         /// <summary>
         /// DE FACUT
