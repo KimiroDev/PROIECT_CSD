@@ -20,10 +20,16 @@ namespace PROIECT_CSD.Interfata_Utilizator
             User = "null";
             UserType = "null";
             InitializeComponent();
-            Evenimente.Evenimente.GenTESTdatabase();
-            Evenimente.Evenimente.TEST_AdaugaUtilizatoriRandom();
+            string dbPath = Path.Combine(Directory.GetCurrentDirectory(), "..\\..\\..\\");
+            dbPath = Path.Combine(dbPath, "hello.db");
+            if (!Directory.Exists(dbPath))
+            {
+                Evenimente.Evenimente.GenTESTdatabase();
+                Evenimente.Evenimente.TEST_AdaugaUtilizatoriRandom();
+            }
             CenterToParent();
             AcceptButton = LoginButton;
+            
         }
 
         private void LoginButton_Click(object sender, EventArgs e)

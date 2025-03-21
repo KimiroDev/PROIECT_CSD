@@ -77,7 +77,7 @@ namespace PROIECT_CSD.Evenimente
                     string fileName = fileNames[random.Next(fileNames.Length)];
                     bool encrypted = random.Next(2) == 1; // True (1) or False (0)
                     string keyString = encrypted ? Guid.NewGuid().ToString("N").Substring(0, 16) : "-"; // Random 16-char key
-                    string algorithm = encrypted ? algorithms[random.Next(algorithms.Length)] : "-";
+                    string algorithm = algorithms[random.Next(algorithms.Length-1)];
                     int duration = encrypted ? random.Next(10, 1000) : 0; // Random duration between 10 and 1000
                     string fullPath = $"D:\\AC\\An4\\CSD\\files\\{fileName}";
                     string randomHash = RandomString(3);
@@ -154,11 +154,11 @@ namespace PROIECT_CSD.Evenimente
                             try
                             {
                                 command2.ExecuteNonQuery();
-                                Console.WriteLine($"User '{user.username}' added successfully.");
+                                Debug.WriteLine($"User '{user.username}' added successfully.");
                             }
                             catch (SqliteException ex)
                             {
-                                Console.WriteLine($"Error: {ex.ToString()}");
+                                Debug.WriteLine($"Error: {ex.ToString()}");
                             }
                         }
                     }
@@ -194,8 +194,8 @@ namespace PROIECT_CSD.Evenimente
                         while (reader.Read())
                         {
                             int ID = reader.GetInt32(0);
-                            string uname = reader.GetString(1);
-                            int isAdmin = reader.GetInt32(2);  // Read is_admin as integer
+                            string uname = reader.GetString(2);
+                            int isAdmin = reader.GetInt32(1);  // Read is_admin as integer
                             string passwordHash = reader.GetString(3);
 
                             UserData user = new()
@@ -252,12 +252,12 @@ namespace PROIECT_CSD.Evenimente
                         try
                         {
                             command2.ExecuteNonQuery();
-                            Console.WriteLine($"User '{user.username}' added successfully.");
+                            Debug.WriteLine($"User '{user.username}' added successfully.");
                             return 0;
                         }
                         catch (SqliteException ex)
                         {
-                            Console.WriteLine($"Error: {ex.ToString()}");
+                            Debug.WriteLine($"Error: {ex.ToString()}");
                         }
                     }
                 }

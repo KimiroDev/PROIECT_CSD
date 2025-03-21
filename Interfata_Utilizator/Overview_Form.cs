@@ -30,7 +30,7 @@ namespace PROIECT_CSD
 
             // genereaza si afiseaza fisiere exemplu
             // (mai incolo doar afisare)
-            Evenimente.Evenimente.GenTESTdatabase();
+            // Evenimente.Evenimente.GenTESTdatabase();
             RefreshListItems();
 
             DialogResult = DialogResult.Continue;
@@ -72,7 +72,7 @@ namespace PROIECT_CSD
 
             if (result == DialogResult.OK && !string.IsNullOrWhiteSpace(dialog.FileName))
             {
-                Evenimente.Evenimente.AddNewFile(dialog.FileName);
+                Evenimente.Evenimente.AddNewFile(dialog.FileName, User);
                 RefreshListItems();
             }
         }

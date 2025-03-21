@@ -16,47 +16,68 @@ namespace PROIECT_CSD.Evenimente
         /// In principal, pentru a fi afisate pe tabelul vizibil.
         /// </summary>
         /// <returns></returns>
-        static public List<EntryData> GetFilesFromDatabase(string user)
+        static public List<EntryData> GetFilesFromDatabase(string username)
         {
-            List<EntryData> list = [];
-            string dbPath = Path.Combine(Directory.GetCurrentDirectory(), "..\\..\\..\\");
-            dbPath = Path.Combine(dbPath, "hello.db");
+            List<EntryData> list = new();
+            string dbPath = Path.Combine(Directory.GetCurrentDirectory(), "..\\..\\..\\hello.db");
             string connectionString = $"Data Source={dbPath};";
 
-            using (var connection3 = new SqliteConnection(connectionString))
+            using (var connection = new SqliteConnection(connectionString))
             {
-                connection3.Open();
+                connection.Open();
 
-                
-                string selectQuery = "SELECT algos.name, algos.isReversable, files.FileName, performances.Duration, performances.KeyUsed, performances.ResultIsEncrypted " +
-                    "FROM algos JOIN performances ON algos.ID = performances.AlgoIDUsed " +
-                    "JOIN files ON files.Hash = performances.HashOfFileNameUsed " +
-                    "JOIN users ON users.ID = files.UserIDWhoAdded " +
-                    "WHERE users.ID = 2; -- Change '2' to the desired UserID";
-                
-                using (var command3 = connection3.CreateCommand())
+                // 🔹 First, get the UserID from the username
+                string userIdQuery = "SELECT ID FROM users WHERE Name = @username";
+                int userId = -1;
+
+                using (var userCommand = connection.CreateCommand())
                 {
-                    command3.CommandText = selectQuery;
-                    using (var reader = command3.ExecuteReader())
+                    userCommand.CommandText = userIdQuery;
+                    userCommand.Parameters.AddWithValue("@username", username);
+
+                    var result = userCommand.ExecuteScalar();
+                    if (result != null)
                     {
-                        Debug.WriteLine("File Name | Algo used | output encrypted | Key | can be reversed | Duration");
+                        userId = Convert.ToInt32(result);
+                    }
+                    else
+                    {
+                        Debug.WriteLine($"User '{username}' not found.");
+                        return list; // Return empty if user doesn't exist
+                    }
+                }
+
+                // 🔹 Now, fetch files for the retrieved UserID
+                string selectQuery = @"
+        SELECT f.FileName, p.ResultIsEncrypted, p.KeyUsed, a.name, p.Duration, a.isReversable
+        FROM files f
+        JOIN performances p ON f.Hash = p.HashOfFileNameUsed
+        LEFT JOIN algos a ON p.AlgoIDUsed = a.ID
+        WHERE f.UserIDWhoAdded = @userId;";
+
+                using (var command = connection.CreateCommand())
+                {
+                    command.CommandText = selectQuery;
+                    command.Parameters.AddWithValue("@userId", userId); // Secure parameterized query
+
+                    using (var reader = command.ExecuteReader())
+                    {
+                        Debug.WriteLine("File Name | Encrypted | Key | Algorithm | Duration | Reversible");
                         Debug.WriteLine("------------------------------------------------------------");
 
                         try
                         {
-
                             while (reader.Read())
                             {
-                                string algorithm = reader.GetString(1);
-                                bool reversable = reader.GetBoolean(2);
-                                string fileName = reader.GetString(3);
-                                int duration = reader.GetInt32(4);
-                                string keyString = reader.GetString(5);
-                                bool encrypted = reader.GetBoolean(6);
-                                
+                                string fileName = reader.GetString(0);
+                                bool encrypted = reader.GetBoolean(1);
+                                string keyString = reader.IsDBNull(2) ? "N/A" : reader.GetString(2);
+                                string algorithm = reader.IsDBNull(2) ? "N/A" : reader.GetString(3);
+                                double duration = reader.IsDBNull(4) ? 0.0 : reader.GetDouble(4);
+                                bool reversable = reader.IsDBNull(2) ? false : reader.GetBoolean(5);
 
                                 // Display the data
-                                Debug.WriteLine($"{fileName} | {algorithm} | {encrypted} | {keyString} | {reversable} | {duration}");
+                                Debug.WriteLine($"{fileName} | {encrypted} | {keyString} | {algorithm} | {duration} | {reversable}");
 
                                 EntryData entry = new()
                                 {
@@ -68,11 +89,13 @@ namespace PROIECT_CSD.Evenimente
                                     Reversable = reversable.ToString(),
                                 };
 
-                                //Orchestrator.AddTemporaryEntry(entry);
                                 list.Add(entry);
                             }
                         }
-                        catch (Exception e) { MessageBox.Show(e.StackTrace, "Eroare la baza de date"); }
+                        catch (Exception e)
+                        {
+                            MessageBox.Show(e.ToString(), "Database Error");
+                        }
                     }
                 }
             }
@@ -98,51 +121,69 @@ namespace PROIECT_CSD.Evenimente
         /// <returns>2 strings representing the name of the user and type 'regular' or 'admin' or 'null' if login fails.</returns>
         static public (string username, string usertype) LoginUser(string username, string passwd)
         {
+            (string, string) userInfo = ("", "null");
 
-            // ...
-            (string, string) placeholder = ("Piratu", "null");
-            if (passwd == "r") placeholder.Item2 = "regular";
-            if (passwd == "a") placeholder.Item2 = "admin";
-            //todo erich: cand se introduce un user si parola, se verifica BD pentru a slava userID-ul 
-            //pt upload
-            /*
-            string dbPath = Path.Combine(Directory.GetCurrentDirectory(), "..\\..\\..\\");
-            dbPath = Path.Combine(dbPath, "hello.db");
+            string dbPath = Path.Combine(Directory.GetCurrentDirectory(), "..\\..\\..\\hello.db");
             string connectionString = $"Data Source={dbPath};";
 
             using (var connection = new SqliteConnection(connectionString))
             {
-                // conectare la baza de date
                 connection.Open();
-                using (var connection2 = new SqliteConnection(connectionString))
+                int userId = -1;
+                bool isAdmin = false;
+
+                // 🔹 1. Check if the user exists
+                using (var command = connection.CreateCommand())
                 {
-                    connection2.Open();
+                    command.CommandText = "SELECT ID, IsAdmin FROM Users WHERE Name = @username;";
+                    command.Parameters.AddWithValue("@username", username);
 
-                    using (var command2 = connection2.CreateCommand())
+                    using (var reader = command.ExecuteReader())
                     {
-                        //check daca file exista sau nu
-                        //...
-                        command2.CommandText = "INSERT INTO FILES (`FileName`, `DateAdded`, `UserIDWhoAdded`, `Hash`) " +
-                            "VALUES (@filename, @dateadded, @useridwhoadded, @hash);";
-
-                        command2.Parameters.AddWithValue("@filename", filepath);
-                        command2.Parameters.AddWithValue("@dateadded", DateTime.Now.ToString());
-                        command2.Parameters.AddWithValue("@useridwhoadded", "");
-
-                        try
+                        if (reader.Read())
                         {
-                            command2.ExecuteNonQuery();
-                            Console.WriteLine($"File '{filepath}' added successfully.");
-                        }
-                        catch (SqliteException ex)
-                        {
-                            Console.WriteLine($"Error: {ex.ToString()}");
+                            userId = reader.GetInt32(0);
+                            isAdmin = reader.GetBoolean(1);
                         }
                     }
                 }
+
+                // 🔹 2. If user does not exist, create it as a regular user
+                if (userId == -1)
+                {
+                    using (var command = connection.CreateCommand())
+                    {
+                        command.CommandText = "INSERT INTO Users (Name, PassHash, IsAdmin) VALUES (@username, @passwd, 0);";
+                        command.Parameters.AddWithValue("@username", username);
+                        command.Parameters.AddWithValue("@passwd", passwd);
+
+                        command.ExecuteNonQuery();
+                    }
+
+                    // Get the newly inserted user's ID
+                    using (var command = connection.CreateCommand())
+                    {
+                        command.CommandText = "SELECT ID FROM Users WHERE Name = @username;";
+                        command.Parameters.AddWithValue("@username", username);
+
+                        using (var reader = command.ExecuteReader())
+                        {
+                            if (reader.Read())
+                            {
+                                userId = reader.GetInt32(0);
+                            }
+                        }
+                    }
+
+                    Debug.WriteLine($"New user '{username}' created as a regular user.");
+                }
+
+                // 🔹 3. Set return values
+                userInfo = (username, isAdmin ? "admin" : "regular");
+                Debug.WriteLine($"User '{username}' logged in. UserID: {userId}, Role: {userInfo.Item2}");
             }
-            */
-            return placeholder;
+
+            return userInfo;
         }
 
         /// <summary>
@@ -150,7 +191,88 @@ namespace PROIECT_CSD.Evenimente
         /// APELATI ORCHESTRATOR.REFRESH SA SE REFLECTE SCHIMBAREA PE FORM
         /// Functia apelata de butonul 'Add File'.
         /// </summary>
-        static public void AddNewFile(string filepath)
+        static public void AddNewFile(string filepath, string username)
+        {
+            string dbPath = Path.Combine(Directory.GetCurrentDirectory(), "..\\..\\..\\hello.db");
+            string connectionString = $"Data Source={dbPath};";
+            string fileHash = RandomString(filepath.Length); // Generate file hash
+            int userId = -1;
+
+            using (var connection = new SqliteConnection(connectionString))
+            {
+                connection.Open();
+
+                using (var transaction = connection.BeginTransaction()) // Ensures atomicity
+                {
+                    try
+                    {
+                        // 🔹 Get the UserID for the given username
+                        using (var command = connection.CreateCommand())
+                        {
+                            command.CommandText = "SELECT ID FROM Users WHERE Name = @username;";
+                            command.Parameters.AddWithValue("@username", username);
+
+                            var result = command.ExecuteScalar();
+                            if (result != null)
+                            {
+                                userId = Convert.ToInt32(result);
+                            }
+                            else
+                            {
+                                // 🔹 User doesn't exist, create them as a regular user
+                                using (var insertUserCommand = connection.CreateCommand())
+                                {
+                                    insertUserCommand.CommandText = @"
+                                INSERT INTO Users (Name, IsAdmin) 
+                                VALUES (@username, 0);
+                                SELECT last_insert_rowid();";  // Get the new UserID
+
+                                    insertUserCommand.Parameters.AddWithValue("@username", username);
+                                    userId = Convert.ToInt32(insertUserCommand.ExecuteScalar());
+                                }
+                                Debug.WriteLine($"User '{username}' not found. Created new regular user with ID {userId}.");
+                            }
+                        }
+
+                        // 🔹 Insert file into FILES table
+                        using (var command2 = connection.CreateCommand())
+                        {
+                            command2.CommandText = @"
+                        INSERT INTO FILES (FileName, DateAdded, UserIDWhoAdded, Hash) 
+                        VALUES (@filename, @dateadded, @useridwhoadded, @hash);";
+
+                            command2.Parameters.AddWithValue("@filename", filepath);
+                            command2.Parameters.AddWithValue("@dateadded", DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss"));
+                            command2.Parameters.AddWithValue("@useridwhoadded", userId);
+                            command2.Parameters.AddWithValue("@hash", fileHash);
+
+                            command2.ExecuteNonQuery();
+                        }
+
+                        // 🔹 Insert blank entry into PERFORMANCES table
+                        using (var command3 = connection.CreateCommand())
+                        {
+                            command3.CommandText = @"
+                        INSERT INTO PERFORMANCES (HashOfFileNameUsed, ResultIsEncrypted) 
+                        VALUES (@hash, 0);";  // Default encryption state = false (0)
+
+                            command3.Parameters.AddWithValue("@hash", fileHash);
+                            command3.ExecuteNonQuery();
+                        }
+
+                        transaction.Commit(); // ✅ Commit changes
+                        Debug.WriteLine($"File '{filepath}' added successfully by user '{username}'.");
+                    }
+                    catch (SqliteException ex)
+                    {
+                        transaction.Rollback(); // ❌ Rollback changes on error
+                        Debug.WriteLine($"Error: {ex.ToString()}");
+                    }
+                }
+            }
+        }
+
+        /*static public void AddNewFile(string filepath)
         {
             string dbPath = Path.Combine(Directory.GetCurrentDirectory(), "..\\..\\..\\");
             dbPath = Path.Combine(dbPath, "hello.db");
@@ -186,12 +308,13 @@ namespace PROIECT_CSD.Evenimente
                         }
                         catch (SqliteException ex)
                         {
-                            Console.WriteLine($"Error: {ex.ToString()}");
+                            Debug.WriteLine($"Error: {ex.ToString()}");
                         }
                     }
                 }
             }
         }
+        */
 
         /// <summary>
         /// DE FACUT

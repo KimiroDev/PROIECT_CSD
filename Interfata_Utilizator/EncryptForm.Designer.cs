@@ -1,4 +1,6 @@
-﻿namespace PROIECT_CSD.Interfata_Utilizator
+﻿using Microsoft.Data.Sqlite;
+
+namespace PROIECT_CSD.Interfata_Utilizator
 {
     partial class EncryptForm
     {
@@ -6,6 +8,33 @@
         /// Required designer variable.
         /// </summary>
         private System.ComponentModel.IContainer components = null;
+
+        private void LoadAlgorithmsIntoComboBox(ComboBox comboBox)
+        {
+            string dbPath = Path.Combine(Directory.GetCurrentDirectory(), "..\\..\\..\\hello.db");
+            string connectionString = $"Data Source={dbPath};";
+
+            List<string> algorithms = new List<string>();
+
+            using (var connection = new SqliteConnection(connectionString))
+            {
+                connection.Open();
+                string query = "SELECT name FROM algos WHERE name IS NOT NULL AND name != '-'";
+
+                using (var command = new SqliteCommand(query, connection))
+                using (var reader = command.ExecuteReader())
+                {
+                    while (reader.Read())
+                    {
+                        algorithms.Add(reader.GetString(0));
+                    }
+                }
+            }
+
+            // Clear previous items and add new ones
+            comboBox.Items.Clear();
+            comboBox.Items.AddRange(algorithms.ToArray());
+        }
 
         /// <summary>
         /// Clean up any resources being used.
@@ -38,7 +67,8 @@
             // comboBox1
             // 
             comboBox1.FormattingEnabled = true;
-            comboBox1.Items.AddRange(new object[] { "SHA256", "RA", "Caesar" });
+            //comboBox1.Items.AddRange(new object[] { "SHA256", "RA", "Caesar" });
+            LoadAlgorithmsIntoComboBox(comboBox1);
             comboBox1.Location = new Point(121, 12);
             comboBox1.Name = "comboBox1";
             comboBox1.Size = new Size(121, 23);

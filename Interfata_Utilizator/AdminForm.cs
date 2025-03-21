@@ -17,6 +17,7 @@ namespace PROIECT_CSD.Interfata_Utilizator
             // multe monitoare Screen.GetBounds nu este initial setat pe monitorul corect
             CenterToScreen();
 
+
             // Centram fereastra
             Rectangle screen = Screen.GetBounds(this);
             Size = new((int)(screen.Width * 0.7d), (int)(screen.Height * 0.5d));
@@ -73,6 +74,7 @@ namespace PROIECT_CSD.Interfata_Utilizator
 
             // adaugarea si mesajul de eroare se intampla in form
             prompt.ShowDialog();
+            RefreshListItems();
         }
 
         private void UserList_SelectedIndexChanged(object sender, EventArgs e)
