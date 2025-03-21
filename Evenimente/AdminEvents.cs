@@ -79,7 +79,6 @@ namespace PROIECT_CSD.Evenimente
                     string keyString = encrypted ? Guid.NewGuid().ToString("N").Substring(0, 16) : "-"; // Random 16-char key
                     string algorithm = algorithms[random.Next(algorithms.Length-1)];
                     int duration = encrypted ? random.Next(10, 1000) : 0; // Random duration between 10 and 1000
-                    string fullPath = $"D:\\AC\\An4\\CSD\\files\\{fileName}";
                     string randomHash = RandomString(3);
                     int randomUserID = random.Next(3);
                     using (var command2 = connection.CreateCommand())
