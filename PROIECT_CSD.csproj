@@ -18,6 +18,7 @@
 
   <ItemGroup>
 	<PackageReference Include="Microsoft.Data.Sqlite" Version="9.0.2" />
+	<PackageReference Include="System.Security.Cryptography.OpenSsl" Version="5.0.0" />
   </ItemGroup>
 
 </Project>
