@@ -27,7 +27,7 @@ namespace PROIECT_CSD.Interfata_Utilizator
 
             int result = Evenimente.Evenimente.EncryptButtonPressed(FileData, comboBox1.Text, textBox1.Text);
             if (result != 0)
-                MessageBox.Show($"Decryption was unsuccessful. Error code {result}", "Error");
+                MessageBox.Show($"Encryption was unsuccessful. Error code {result}", "Error");
 
             else
             {

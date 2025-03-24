@@ -21,20 +21,25 @@ Documentatia lor se afla in cod.
 Inca nu am implementat tebela pt admini, asa ca inca nu este nicio dif intre cele 2
 
 ## Facut Pana acum
-- ![Mascota](https://pbs.twimg.com/profile_images/775573562434256897/tq_qo0uc_400x400.jpg "Mascota")
-
-## De Facut
 - Arhitectura codului [matei]
 - Elemente de gui [matei]: 
     - login [v]
     - tabel de utilizatori pentru admin [todo]
     - overview (tabel, butoane pt operatiile **`CRUD`**) [v]
-    - fereastra de manage users (potential drepturi) [todo]
-- design baza de date [parca erich]
-    - ...
-    - ...
-- encriptarea efectiva cu openssl [parca victor]
-    - ...
-    - ...
+    - fereastra de manage users [v]
+- baza de date [erich]
+    - conexiunea cu baza de date [v]
+    - adaugare fisier
+## De Facut
+
+- baza de date [erich]
+    - editat fisiere
+    - sters fisiere
+    - sters fisiere
+    - baza de date sa nu se reseteze si sa nu mai adauge date de test
+- encriptarea efectiva cu openssl [victor]
+    - ecnryptarea fierelor
+    - decriptarea fisierelor
+    - encryptare parola cand adaug/editez user
 - ...
 - documentatia [vedem]

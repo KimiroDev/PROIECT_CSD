@@ -30,7 +30,7 @@ namespace PROIECT_CSD.Interfata_Utilizator
             UserName = username;
             UserType = usertype;
             UserNameLabel.Text = UserName;
-            UserTypeLabel.Text = UserType == "admin" ? "Admin" : "Regular user";
+            UserTypeLabel.Text = "Administrator";
             Text = UserName + "'s files";
 
             DialogResult = DialogResult.Continue;

@@ -1,4 +1,5 @@
 ﻿using PROIECT_CSD.Date;
+using System.Security.Cryptography;
 
 
 namespace PROIECT_CSD.Evenimente
@@ -16,6 +17,14 @@ namespace PROIECT_CSD.Evenimente
         static public int EncryptButtonPressed(EntryData item, string alg, string key)
         {
             //trb lui victor
+            switch(alg)
+            {
+                case "AES-128":
+                    Aes myAES = Aes.Create();
+                    MessageBox.Show("Cica criptez fisier cu aes-128 si key = "+key, "Treaba lui Victor");
+                    return 0;
+                    break;
+            }
             return -1;
         }
 
