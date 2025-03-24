@@ -117,73 +117,6 @@ namespace PROIECT_CSD.Evenimente
             return 0;
         }
 
-        /// <summary>
-        /// DE FACUT logare.
-        /// </summary>
-        /// <returns>2 strings representing the name of the user and type 'regular' or 'admin' or 'null' if login fails.</returns>
-
-        /*static public (string username, string usertype) LoginUser(string username, string passwd)
-        {
-            (string, string) userInfo = ("", "null");
-
-            string dbPath = Path.Combine(Directory.GetCurrentDirectory(), "..\\..\\..\\hello.db");
-            string connectionString = $"Data Source={dbPath};";
-
-            using (var connection = new SqliteConnection(connectionString))
-            {
-                connection.Open();
-                int userId = -1;
-                bool isAdmin = false;
-
-                using (var command = connection.CreateCommand())
-                {
-                    command.CommandText = "SELECT ID, IsAdmin FROM Users WHERE Name = @username;";
-                    command.Parameters.AddWithValue("@username", username);
-
-                    using (var reader = command.ExecuteReader())
-                    {
-                        if (reader.Read())
-                        {
-                            userId = reader.GetInt32(0);
-                            isAdmin = reader.GetBoolean(1);
-                        }
-                    }
-                }
-                if (userId == -1)
-                {
-                    using (var command = connection.CreateCommand())
-                    {
-                        command.CommandText = "INSERT INTO Users (Name, PassHash, IsAdmin) VALUES (@username, @passwd, 0);";
-                        command.Parameters.AddWithValue("@username", username);
-                        command.Parameters.AddWithValue("@passwd", passwd);
-
-                        command.ExecuteNonQuery();
-                    }
-
-                    using (var command = connection.CreateCommand())
-                    {
-                        command.CommandText = "SELECT ID FROM Users WHERE Name = @username;";
-                        command.Parameters.AddWithValue("@username", username);
-
-                        using (var reader = command.ExecuteReader())
-                        {
-                            if (reader.Read())
-                            {
-                                userId = reader.GetInt32(0);
-                            }
-                        }
-                    }
-
-                    Debug.WriteLine($"New user '{username}' created as a regular user.");
-                }
-
-                userInfo = (username, isAdmin ? "admin" : "regular");
-                Debug.WriteLine($"User '{username}' logged in. UserID: {userId}, Role: {userInfo.Item2}");
-            }
-
-            return userInfo;
-        }
-        */
         static public (string username, string usertype) LoginUser(string username, string passwd)
         {
             (string, string) userInfo = ("", "null");
@@ -246,7 +179,7 @@ namespace PROIECT_CSD.Evenimente
                 {
                     // Check if the password matches
                     //grija ca aici verifica hashul
-                    if (storedPassHash != passwd)
+                    if (storedPassHash != Evenimente.SHA256EncryptPassword(passwd))
                     {
                         MessageBox.Show("Incorrect username and password");
                         return ("", "null");

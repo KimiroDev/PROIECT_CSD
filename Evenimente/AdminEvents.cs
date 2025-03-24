@@ -153,7 +153,7 @@ CREATE TABLE IF NOT EXISTS FILES (
 
                 var users = new (string username, int isAdmin, string passwordHash)[]
                 {
-            ("admin", 1, "5e884898da28047151d0e56f8dc6292773603d0d6aabbdd5382b7c3e09f66302"), // "password"
+            ("admin", 1, "5e884898da28047151d0e56f8dc6292773603d0d6aabbdd62a11ef721d1542d8"), // "password"
             ("user1", 0, "6bb4837eb74329105ee4568dda7dc67ed2ca2ad9bd50d831bd547ee40a071e47"), // "123456"
             ("user2", 0, "f7c3bc1d808e04732adf679965ccc34ca7ae3441"), // "letmein"
             ("guest", 0, "bcb82ef67410ea9b56f0272f3b7db7c21cf1f20c"), // "welcome"
@@ -273,7 +273,7 @@ CREATE TABLE IF NOT EXISTS FILES (
 
                         command2.Parameters.AddWithValue("@username", user.username);
                         command2.Parameters.AddWithValue("@is_admin", user.isAdmin);
-                        command2.Parameters.AddWithValue("@password_hash", user.passwordhash);
+                        command2.Parameters.AddWithValue("@password_hash", Evenimente.SHA256EncryptPassword(user.passwordhash));
 
                         try
                         {
@@ -317,12 +317,12 @@ CREATE TABLE IF NOT EXISTS FILES (
                         command2.CommandText = "UPDATE users " +
                             "SET IsAdmin = @is_admin, " +
                             "Name = @newusername, PassHash = @password_hash" +
-                            "WHERE ID = (SELECT ID FROM USERS WHERE Name is @username);";
+                            "WHERE ID = (SELECT USERS.ID FROM USERS WHERE Name is @username);";
 
                         command2.Parameters.AddWithValue("@username", olduser);
                         command2.Parameters.AddWithValue("@newusername", user.username);
                         command2.Parameters.AddWithValue("@is_admin", user.isAdmin);
-                        command2.Parameters.AddWithValue("@password_hash", user.passwordhash);
+                        command2.Parameters.AddWithValue("@password_hash", Evenimente.SHA256EncryptPassword(user.passwordhash));
 
                         try
                         {

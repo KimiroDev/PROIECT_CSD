@@ -1,5 +1,6 @@
 ﻿using PROIECT_CSD.Date;
 using System.Security.Cryptography;
+using System.Text;
 
 
 namespace PROIECT_CSD.Evenimente
@@ -26,6 +27,24 @@ namespace PROIECT_CSD.Evenimente
                     break;
             }
             return -1;
+        }
+
+        static public string SHA256EncryptPassword(string password)
+        {
+            using (SHA256 sha256 = SHA256.Create())
+            {
+                //trebuie trecut din string in bytes pentru functia de hash
+                //si dupa inapoi in string pentru punerea in baza de date
+                byte[] inputBytes = Encoding.UTF8.GetBytes(password);
+                byte[] hashBytes = sha256.ComputeHash(inputBytes);
+                StringBuilder sb = new StringBuilder();
+                foreach (byte b in hashBytes)
+                {
+                    sb.Append(b.ToString("x2"));
+                }
+                return sb.ToString();
+            }
+
         }
 
         /// <summary>
