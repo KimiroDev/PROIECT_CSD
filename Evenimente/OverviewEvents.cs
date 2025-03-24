@@ -211,25 +211,24 @@ namespace PROIECT_CSD.Evenimente
 
         /// <summary>
         /// DE FACUT
-        /// APELATI ORCHESTRATOR.REFRESH SA SE REFLECTE SCHIMBAREA PE FORM
         /// Functia apelata de butonul 'Add File'.
         /// </summary>
         static public void AddNewFile(string filepath, string username)
         {
             string dbPath = Path.Combine(Directory.GetCurrentDirectory(), "..\\..\\..\\hello.db");
             string connectionString = $"Data Source={dbPath};";
-            string fileHash = RandomString(filepath.Length); // Generate file hash
+            string fileHash = RandomString(filepath.Length);
             int userId = -1;
 
             using (var connection = new SqliteConnection(connectionString))
             {
                 connection.Open();
 
-                using (var transaction = connection.BeginTransaction()) // Ensures atomicity
+                using (var transaction = connection.BeginTransaction())
                 {
                     try
                     {
-                        // 🔹 Get the UserID for the given username
+                        //Get the UserID for the given username
                         using (var command = connection.CreateCommand())
                         {
                             command.CommandText = "SELECT ID FROM Users WHERE Name = @username;";
@@ -242,7 +241,7 @@ namespace PROIECT_CSD.Evenimente
                             }
                             else
                             {
-                                // 🔹 User doesn't exist, create them as a regular user
+                                //User doesn't exist, create them as a regular user
                                 using (var insertUserCommand = connection.CreateCommand())
                                 {
                                     insertUserCommand.CommandText = @"
@@ -257,7 +256,7 @@ namespace PROIECT_CSD.Evenimente
                             }
                         }
 
-                        // 🔹 Insert file into FILES table
+                        //Insert file into FILES table
                         using (var command2 = connection.CreateCommand())
                         {
                             command2.CommandText = @"
@@ -272,7 +271,7 @@ namespace PROIECT_CSD.Evenimente
                             command2.ExecuteNonQuery();
                         }
 
-                        // 🔹 Insert blank entry into PERFORMANCES table
+                        //Insert blank entry into PERFORMANCES table
                         using (var command3 = connection.CreateCommand())
                         {
                             command3.CommandText = @"
@@ -283,12 +282,12 @@ namespace PROIECT_CSD.Evenimente
                             command3.ExecuteNonQuery();
                         }
 
-                        transaction.Commit(); // ✅ Commit changes
+                        transaction.Commit(); //Commit changes
                         Debug.WriteLine($"File '{filepath}' added successfully by user '{username}'.");
                     }
                     catch (SqliteException ex)
                     {
-                        transaction.Rollback(); // ❌ Rollback changes on error
+                        transaction.Rollback(); //Rollback changes on error
                         Debug.WriteLine($"Error: {ex.ToString()}");
                     }
                 }
