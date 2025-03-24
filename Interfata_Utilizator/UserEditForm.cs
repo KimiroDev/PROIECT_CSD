@@ -23,6 +23,8 @@ namespace PROIECT_CSD.Interfata_Utilizator
             IsAdminCheckBox.Checked = user.isAdmin;
 
             User = user;
+
+            CenterToScreen();
         }
 
         private void BtnClose_Click(object sender, EventArgs e)
@@ -39,9 +41,6 @@ namespace PROIECT_CSD.Interfata_Utilizator
                 passwordhash = PasswordTextBox.Text,
                 isAdmin = IsAdminCheckBox.Checked,
             });
-
-            if (result != 0)
-                MessageBox.Show($"Could not edit user. Message error {result}.", "Error");
 
             Close();
         }

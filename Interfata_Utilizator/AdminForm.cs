@@ -93,9 +93,22 @@ namespace PROIECT_CSD.Interfata_Utilizator
 
         private void BtnEditUser_Click(object sender, EventArgs e)
         {
+            if (UserList.SelectedItems.Count != 1)
+            {
+                MessageBox.Show("Please select a user to edit.", "Error");
+                return;
+            }
             UserEditForm editform = new(new UserData() { 
-                //username = UserList.Items. DE ADAUGAT
+                id = int.Parse(UserList.SelectedItems[0].SubItems[0].Text),
+                isAdmin = bool.Parse(UserList.SelectedItems[0].SubItems[1].Text),
+                username = UserList.SelectedItems[0].SubItems[2].Text,
+                passwordhash = UserList.SelectedItems[0].SubItems[3].Text
             });
+            DialogResult result = editform.ShowDialog();
+            if (result != DialogResult.OK)
+                MessageBox.Show("Could not edit user.", "Error");
+
+            RefreshListItems();
         }
     }
 }
