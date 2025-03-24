@@ -121,7 +121,8 @@ namespace PROIECT_CSD.Evenimente
         /// DE FACUT logare.
         /// </summary>
         /// <returns>2 strings representing the name of the user and type 'regular' or 'admin' or 'null' if login fails.</returns>
-        static public (string username, string usertype) LoginUser(string username, string passwd)
+
+        /*static public (string username, string usertype) LoginUser(string username, string passwd)
         {
             (string, string) userInfo = ("", "null");
 
@@ -134,7 +135,6 @@ namespace PROIECT_CSD.Evenimente
                 int userId = -1;
                 bool isAdmin = false;
 
-                // 🔹 1. Check if the user exists
                 using (var command = connection.CreateCommand())
                 {
                     command.CommandText = "SELECT ID, IsAdmin FROM Users WHERE Name = @username;";
@@ -149,8 +149,6 @@ namespace PROIECT_CSD.Evenimente
                         }
                     }
                 }
-
-                // 🔹 2. If user does not exist, create it as a regular user
                 if (userId == -1)
                 {
                     using (var command = connection.CreateCommand())
@@ -162,7 +160,6 @@ namespace PROIECT_CSD.Evenimente
                         command.ExecuteNonQuery();
                     }
 
-                    // Get the newly inserted user's ID
                     using (var command = connection.CreateCommand())
                     {
                         command.CommandText = "SELECT ID FROM Users WHERE Name = @username;";
@@ -180,13 +177,90 @@ namespace PROIECT_CSD.Evenimente
                     Debug.WriteLine($"New user '{username}' created as a regular user.");
                 }
 
-                // 🔹 3. Set return values
                 userInfo = (username, isAdmin ? "admin" : "regular");
                 Debug.WriteLine($"User '{username}' logged in. UserID: {userId}, Role: {userInfo.Item2}");
             }
 
             return userInfo;
         }
+        */
+        static public (string username, string usertype) LoginUser(string username, string passwd)
+        {
+            (string, string) userInfo = ("", "null");
+
+            string dbPath = Path.Combine(Directory.GetCurrentDirectory(), "..\\..\\..\\hello.db");
+            string connectionString = $"Data Source={dbPath};";
+
+            using (var connection = new SqliteConnection(connectionString))
+            {
+                connection.Open();
+                int userId = -1;
+                bool isAdmin = false;
+                string storedPassHash = "";
+
+                using (var command = connection.CreateCommand())
+                {
+                    command.CommandText = "SELECT ID, PassHash, IsAdmin FROM Users WHERE Name = @username;";
+                    command.Parameters.AddWithValue("@username", username);
+
+                    using (var reader = command.ExecuteReader())
+                    {
+                        if (reader.Read())
+                        {
+                            userId = reader.GetInt32(0);
+                            storedPassHash = reader.GetString(1);
+                            isAdmin = reader.GetBoolean(2);
+                        }
+                    }
+                }
+
+                if (userId == -1)
+                {
+                    // User does not exist, create a new user
+                    using (var command = connection.CreateCommand())
+                    {
+                        command.CommandText = "INSERT INTO Users (Name, PassHash, IsAdmin) VALUES (@username, @passwd, 0);";
+                        command.Parameters.AddWithValue("@username", username);
+                        command.Parameters.AddWithValue("@passwd", passwd);
+
+                        command.ExecuteNonQuery();
+                    }
+
+                    using (var command = connection.CreateCommand())
+                    {
+                        command.CommandText = "SELECT ID FROM Users WHERE Name = @username;";
+                        command.Parameters.AddWithValue("@username", username);
+
+                        using (var reader = command.ExecuteReader())
+                        {
+                            if (reader.Read())
+                            {
+                                userId = reader.GetInt32(0);
+                            }
+                        }
+                    }
+
+                    Debug.WriteLine($"New user '{username}' created as a regular user.");
+                }
+                else
+                {
+                    // Check if the password matches
+                    //grija ca aici verifica hashul
+                    if (storedPassHash != passwd)
+                    {
+                        MessageBox.Show("Incorrect username and password");
+                        return ("", "null");
+                        //throw new UnauthorizedAccessException("Incorrect password.");
+                    }
+                }
+
+                userInfo = (username, isAdmin ? "admin" : "regular");
+                Debug.WriteLine($"User '{username}' logged in. UserID: {userId}, Role: {userInfo.Item2}");
+            }
+
+            return userInfo;
+        }
+
 
         static public int? GetUserIdByName(string userName)
         {
@@ -229,7 +303,6 @@ namespace PROIECT_CSD.Evenimente
                 {
                     try
                     {
-                        // 🔹 Get the UserID for the given username
                         using (var command = connection.CreateCommand())
                         {
                             command.CommandText = "SELECT ID FROM Users WHERE Name = @username;";

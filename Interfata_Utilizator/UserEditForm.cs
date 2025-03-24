@@ -40,7 +40,7 @@ namespace PROIECT_CSD.Interfata_Utilizator
                 username = UsernameTextBox.Text,
                 passwordhash = PasswordTextBox.Text,
                 isAdmin = IsAdminCheckBox.Checked,
-            });
+            }, User.username.ToString());
 
             Close();
         }

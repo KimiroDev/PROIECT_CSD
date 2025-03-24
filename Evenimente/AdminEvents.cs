@@ -296,12 +296,50 @@ CREATE TABLE IF NOT EXISTS FILES (
         /// </summary>
         /// <param name="user"></param>
         /// <returns></returns>
-        static public int EditUser(UserData user)
+        static public int EditUser(UserData user, string olduser)
         {
+            Debug.WriteLine("attempting to edit ", olduser);
+            
+            string dbPath = Path.Combine(Directory.GetCurrentDirectory(), "..\\..\\..\\");
+            dbPath = Path.Combine(dbPath, "hello.db");
+            string connectionString = $"Data Source={dbPath};";
 
-            // ... erich
+            using (var connection = new SqliteConnection(connectionString))
+            {
+                // conectare la baza de date
+                connection.Open();
+                using (var connection2 = new SqliteConnection(connectionString))
+                {
+                    connection2.Open();
 
-            return -1;
+                    using (var command2 = connection2.CreateCommand())
+                    {
+                        command2.CommandText = "UPDATE users " +
+                            "SET IsAdmin = @is_admin, " +
+                            "Name = @newusername, PassHash = @password_hash" +
+                            "WHERE ID = (SELECT ID FROM USERS WHERE Name is @username);";
+
+                        command2.Parameters.AddWithValue("@username", olduser);
+                        command2.Parameters.AddWithValue("@newusername", user.username);
+                        command2.Parameters.AddWithValue("@is_admin", user.isAdmin);
+                        command2.Parameters.AddWithValue("@password_hash", user.passwordhash);
+
+                        try
+                        {
+                            command2.ExecuteNonQuery();
+                            Debug.WriteLine($"User '{user.username}' updated successfully.");
+                            return 0;
+                        }
+                        catch (SqliteException ex)
+                        {
+                            Debug.WriteLine($"Error: {ex.ToString()}");
+                        }
+                    }
+                }
+            }
+           
+            return -1;  
+           
         }
     }
 }
