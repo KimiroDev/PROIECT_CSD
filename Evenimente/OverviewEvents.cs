@@ -277,7 +277,7 @@ namespace PROIECT_CSD.Evenimente
                         {
                             command3.CommandText = @"
                         INSERT INTO PERFORMANCES (HashOfFileNameUsed, ResultIsEncrypted) 
-                        VALUES (@hash, 0);";  // Default encryption state = false (0)
+                        VALUES (@hash, FALSE);";  // Default encryption state = false (0)
 
                             command3.Parameters.AddWithValue("@hash", fileHash);
                             command3.ExecuteNonQuery();

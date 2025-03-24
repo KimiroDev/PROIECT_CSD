@@ -72,11 +72,11 @@ CREATE TABLE IF NOT EXISTS FILES (
 
                 command.CommandText = @"
         CREATE TABLE IF NOT EXISTS PERFORMANCES (
-        `AlgoIDUsed` INTEGER NOT NULL,
-        `HashOfFileNameUsed` VARCHAR(50) NOT NULL,
-        `Duration` DOUBLE NOT NULL,
+        `AlgoIDUsed` INTEGER DEFAULT NULL,
+        `HashOfFileNameUsed` VARCHAR(50) DEFAULT NULL,
+        `Duration` DOUBLE DEFAULT NULL,
         `KeyUsed` VARCHAR(50) NULL,
-        `ResultIsEncrypted` BOOLEAN NOT NULL,
+        `ResultIsEncrypted` BOOLEAN DEFAULT NULL,
         FOREIGN KEY(AlgoIDUsed) REFERENCES ALGOS(ID),
         FOREIGN KEY(HashOfFileNameUsed) REFERENCES FILES(Hash)
         );";
@@ -107,7 +107,6 @@ CREATE TABLE IF NOT EXISTS FILES (
                     int duration = encrypted ? random.Next(10, 1000) : 0; // Random duration between 10 and 1000
                     string randomHash = RandomString(3);
                     int randomUserID = random.Next(3);
-                    int randomUserID = random.Next(3);
                     using (var command2 = connection.CreateCommand())
                     {
                         command2.CommandText = "INSERT INTO FILES (FileName, DateAdded, UserIDWhoAdded, Hash) " +
@@ -115,7 +114,7 @@ CREATE TABLE IF NOT EXISTS FILES (
                         command2.Parameters.AddWithValue("@fileName", fileName);
                         command2.Parameters.AddWithValue("@dateAdded", DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss"));
                         command2.Parameters.AddWithValue("@userID", piratuUserID);
-                        command2.Parameters.AddWithValue("@hash", fileHash);
+                        command2.Parameters.AddWithValue("@hash", randomHash);
                         command2.ExecuteNonQuery();
 
                         command2.CommandText = "INSERT INTO ALGOS (isReversable, name) VALUES (@isReversable, @algoName);";
