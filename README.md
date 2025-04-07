@@ -30,6 +30,10 @@ Inca nu am implementat tebela pt admini, asa ca inca nu este nicio dif intre cel
 - baza de date [erich]
     - conexiunea cu baza de date [v]
     - adaugare fisier
+- encriptarea efectiva cu openssl [victor]
+    - creare/login cu parola criptata
+    - schimbarea parolei a unui user de catre admin
+      
 ## De Facut
 
 - baza de date [erich]
@@ -37,6 +41,7 @@ Inca nu am implementat tebela pt admini, asa ca inca nu este nicio dif intre cel
     - sters fisiere
     - sters fisiere
     - baza de date sa nu se reseteze si sa nu mai adauge date de test
+    - mai multe coloane pe baza de date vizibile doar pentru admin (keys, iv(aes),etc [victor] mai are de vazut ce e nevoie)
 - encriptarea efectiva cu openssl [victor]
     - ecnryptarea fierelor
     - decriptarea fisierelor
