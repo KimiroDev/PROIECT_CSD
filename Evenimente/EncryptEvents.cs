@@ -21,11 +21,38 @@ namespace PROIECT_CSD.Evenimente
             switch(alg)
             {
                 case "AES-128":
+                    //trebuie iv generat 
+                    //key si iv trebuie stocate in baza de date dar vazute doar de admini
+                    if(key.Length!=16)
+                    {
+                        MessageBox.Show("Key length must be 16 characters.","Key length error!");
+                        return -1;
+                    }
                     Aes myAES = Aes.Create();
-                    MessageBox.Show("Cica criptez fisier cu aes-128 si key = "+key, "Treaba lui Victor");
+                    byte[] keyBytes = Encoding.UTF8.GetBytes(key);
+                    myAES.Key = keyBytes;
+                    RandomNumberGenerator rng = RandomNumberGenerator.Create();
+                    rng.GetBytes(myAES.IV);
+                    string outputPath = item.FileFullPath.Substring(item.FileFullPath.LastIndexOf('/')+1);
+                    using (FileStream inputFileStream = new FileStream(item.FileFullPath, FileMode.Open, FileAccess.Read))
+                    using (FileStream outputFileStream = new FileStream(outputPath, FileMode.Create, FileAccess.Write))
+                    using (CryptoStream cryptoStream = new CryptoStream(outputFileStream, myAES.CreateEncryptor(), CryptoStreamMode.Write))
+                            inputFileStream.CopyTo(cryptoStream);
+                    MessageBox.Show("Cica criptez fisier cu aes-128 \nkey = " + key + " \nkey in bytes : " + keyBytes.ToString() + "\niv = " + myAES.IV.ToString(), "Treaba lui Victor");
+
                     return 0;
                     break;
             }
+            return -1;
+        }
+
+        /// <summary>
+        /// S-a apasat butonul de adaugare din prompt-ul de adaugare entry.
+        /// </summary>
+        /// <param name="item">Entry- ul de adaugat in baza de date sau idk unde.</param>
+        /// <returns>true daca s-a putut adauga, false altfel</returns>
+        static public int DecryptButtonPressed(EntryData item)
+        {
             return -1;
         }
 
@@ -47,14 +74,5 @@ namespace PROIECT_CSD.Evenimente
 
         }
 
-        /// <summary>
-        /// S-a apasat butonul de adaugare din prompt-ul de adaugare entry.
-        /// </summary>
-        /// <param name="item">Entry- ul de adaugat in baza de date sau idk unde.</param>
-        /// <returns>true daca s-a putut adauga, false altfel</returns>
-        static public int DecryptButtonPressed(EntryData item)
-        {
-            return -1;
-        }
     }
 }
