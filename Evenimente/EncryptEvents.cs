@@ -31,19 +31,35 @@ namespace PROIECT_CSD.Evenimente
                     Aes myAES = Aes.Create();
                     byte[] keyBytes = Encoding.UTF8.GetBytes(key);
                     myAES.Key = keyBytes;
-                    RandomNumberGenerator rng = RandomNumberGenerator.Create();
-                    rng.GetBytes(myAES.IV);
-                    string outputPath = item.FileFullPath.Substring(item.FileFullPath.LastIndexOf('/')+1);
+                    myAES.GenerateIV();
+                    //RandomNumberGenerator rng = RandomNumberGenerator.Create();
+                    //rng.GetBytes(myAES.IV);
+                    string fileName = Path.GetFileName(item.FileFullPath);
+                    string outputPath = fileName + ".encrypted";
                     using (FileStream inputFileStream = new FileStream(item.FileFullPath, FileMode.Open, FileAccess.Read))
                     using (FileStream outputFileStream = new FileStream(outputPath, FileMode.Create, FileAccess.Write))
-                    using (CryptoStream cryptoStream = new CryptoStream(outputFileStream, myAES.CreateEncryptor(), CryptoStreamMode.Write))
+                    {
+                        outputFileStream.Write(myAES.IV, 0, myAES.IV.Length);
+                        using (CryptoStream cryptoStream = new CryptoStream(outputFileStream, myAES.CreateEncryptor(), CryptoStreamMode.Write))
+                        {
                             inputFileStream.CopyTo(cryptoStream);
+                        }
+                    }
                     MessageBox.Show("Cica criptez fisier cu aes-128 \nkey = " + key + " \nkey in bytes : " + keyBytes.ToString() + "\niv = " + myAES.IV.ToString(), "Treaba lui Victor");
+                    item.EncryptionAlgorithm = "AES-128";
+                    StringBuilder sb = new StringBuilder();
+                    foreach (byte b in myAES.Key)
+                    {
+                        sb.Append(b.ToString("x2"));
+                    }
+                    item.EncryptionKey = sb.ToString();
 
                     return 0;
                     break;
+
+                default:
+                    return -1;
             }
-            return -1;
         }
 
         /// <summary>
@@ -53,7 +69,28 @@ namespace PROIECT_CSD.Evenimente
         /// <returns>true daca s-a putut adauga, false altfel</returns>
         static public int DecryptButtonPressed(EntryData item)
         {
-            return -1;
+            switch(item.EncryptionAlgorithm)
+            {
+                case ("AES-128"):
+                    Aes myAES = Aes.Create();
+                    using (FileStream inputFileStream = new FileStream(item.FileFullPath + ".encrypted", FileMode.Open, FileAccess.Read))
+                    {
+                        // Read the IV from the file (first 16 bytes)
+                        byte[] iv = new byte[16];
+                        inputFileStream.Read(iv, 0, 16);
+                        myAES.IV = iv;
+
+                        using (FileStream outputFileStream = new FileStream(item.FileFullPath + ".deencrypted", FileMode.Create, FileAccess.Write))
+                        using (CryptoStream cryptoStream = new CryptoStream(outputFileStream, myAES.CreateDecryptor(), CryptoStreamMode.Write))
+                        {
+                            inputFileStream.CopyTo(cryptoStream);
+                        }
+                    }
+                    return 0;
+                    break;
+                default:
+                    return -1;
+            }
         }
 
         static public string SHA256EncryptPassword(string password)
