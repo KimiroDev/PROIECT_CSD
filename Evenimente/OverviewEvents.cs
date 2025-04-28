@@ -81,7 +81,8 @@ namespace PROIECT_CSD.Evenimente
 
                         EntryData entry = new EntryData
                         {
-                            FileName = fileName,
+                            FileName = Path.GetFileName(fileName),
+                            FileFullPath = fileName,
                             Encrypted = encrypted ? "true" : "false",
                             EncryptionKey = keyString,
                             EncryptionAlgorithm = algorithm,
@@ -112,7 +113,7 @@ namespace PROIECT_CSD.Evenimente
         static public int EditEntry(EntryData entry)
         {
             // ...
-
+            
             // modificare cu succes
             return 0;
         }

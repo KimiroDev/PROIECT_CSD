@@ -36,8 +36,17 @@ namespace PROIECT_CSD
             DialogResult = DialogResult.Continue;
         }
 
-        private string User;
+        private static string User;
         private string UserType;
+        
+        /// <summary>
+        /// Ofera numele utilizatorului
+        /// </summary>
+        /// <returns></returns>
+        public static string getUser()
+        {
+             return User;
+        }
 
         /// <summary>
         /// Ia date despre fisierele utilizatorului din baza de date si le afiseaza pe ecran.

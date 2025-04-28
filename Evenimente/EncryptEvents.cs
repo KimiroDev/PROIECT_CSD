@@ -1,4 +1,6 @@
-﻿using PROIECT_CSD.Date;
+﻿using Microsoft.VisualBasic.ApplicationServices;
+using PROIECT_CSD.Date;
+using PROIECT_CSD.Interfata_Utilizator;
 using System.Security.Cryptography;
 using System.Text;
 
@@ -36,8 +38,9 @@ namespace PROIECT_CSD.Evenimente
                     //rng.GetBytes(myAES.IV);
                     string fileName = Path.GetFileName(item.FileFullPath);
                     string outputPath = fileName + ".encrypted";
+                    string outputFullPath = item.FileFullPath + ".encrypted";
                     using (FileStream inputFileStream = new FileStream(item.FileFullPath, FileMode.Open, FileAccess.Read))
-                    using (FileStream outputFileStream = new FileStream(outputPath, FileMode.Create, FileAccess.Write))
+                    using (FileStream outputFileStream = new FileStream(outputFullPath, FileMode.Create, FileAccess.Write))
                     {
                         outputFileStream.Write(myAES.IV, 0, myAES.IV.Length);
                         using (CryptoStream cryptoStream = new CryptoStream(outputFileStream, myAES.CreateEncryptor(), CryptoStreamMode.Write))
@@ -53,6 +56,15 @@ namespace PROIECT_CSD.Evenimente
                         sb.Append(b.ToString("x2"));
                     }
                     item.EncryptionKey = sb.ToString();
+                    EntryData encryptedEntryData;
+                    encryptedEntryData.Encrypted = "true";
+                    encryptedEntryData.EncryptionAlgorithm = "AES-128";
+                    encryptedEntryData.EncryptionKey = sb.ToString();
+                    encryptedEntryData.FileFullPath = outputFullPath;
+                    encryptedEntryData.FileName = Path.GetFileName(outputPath);
+                    AddNewFile(outputFullPath,Overview_Form.getUser());
+
+
 
                     return 0;
                     break;
@@ -79,8 +91,7 @@ namespace PROIECT_CSD.Evenimente
                         byte[] iv = new byte[16];
                         inputFileStream.Read(iv, 0, 16);
                         myAES.IV = iv;
-
-                        using (FileStream outputFileStream = new FileStream(item.FileFullPath + ".deencrypted", FileMode.Create, FileAccess.Write))
+                        using (FileStream outputFileStream = new FileStream(item.FileFullPath.Split('.')[0] + ".decrypted", FileMode.Create, FileAccess.Write))
                         using (CryptoStream cryptoStream = new CryptoStream(outputFileStream, myAES.CreateDecryptor(), CryptoStreamMode.Write))
                         {
                             inputFileStream.CopyTo(cryptoStream);
