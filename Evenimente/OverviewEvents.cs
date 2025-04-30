@@ -301,68 +301,87 @@ namespace PROIECT_CSD.Evenimente
             }
         }
 
-        /*static public void AddNewFile(string filepath)
+        static public void AddNewFile(EntryData data, string username)
         {
-            string dbPath = Path.Combine(Directory.GetCurrentDirectory(), "..\\..\\..\\");
-            dbPath = Path.Combine(dbPath, "hello.db");
+            string dbPath = Path.Combine(Directory.GetCurrentDirectory(), "..\\..\\..\\hello.db");
             string connectionString = $"Data Source={dbPath};";
+            string fileHash = RandomString(data.FileName.Length);
+            int userId = -1;
 
             using (var connection = new SqliteConnection(connectionString))
             {
                 connection.Open();
 
-                // 1️⃣ Check if user exists
-                using (var checkUserCmd = connection.CreateCommand())
+                using (var transaction = connection.BeginTransaction())
                 {
-                    checkUserCmd.CommandText = "SELECT COUNT(*) FROM USERS WHERE ID = @userID;";
-                    checkUserCmd.Parameters.AddWithValue("@userID", GetUserIdByName("Piratu"));
-                    long count = (long)checkUserCmd.ExecuteScalar();
-                    if (count == 0)
+                    try
                     {
-                        Console.WriteLine("Error: User with ID 1 does not exist!");
-                        return;
-                    }
-                }
-
-                // 2️⃣ Check if file already exists
-                using (var checkFileCmd = connection.CreateCommand())
-                {
-                    checkFileCmd.CommandText = "SELECT COUNT(*) FROM FILES WHERE FileName = @filename;";
-                    checkFileCmd.Parameters.AddWithValue("@filename", filepath);
-                    long fileCount = (long)checkFileCmd.ExecuteScalar();
-                    if (fileCount > 0)
-                    {
-                        Console.WriteLine($"Error: File '{filepath}' already exists in the database.");
-                        return;
-                    }
-                }
-
-                // 3️⃣ Insert new file
-                using (var command = connection.CreateCommand())
-                {
-                    command.CommandText = "INSERT INTO FILES (`FileName`, `DateAdded`, `UserIDWhoAdded`, `Hash`) " +
-                                          "VALUES (@filename, @dateadded, @useridwhoadded, @hash);";
-
-                    command.Parameters.AddWithValue("@filename", filepath);
-                    command.Parameters.AddWithValue("@dateadded", DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss"));
-                    command.Parameters.AddWithValue("@useridwhoadded", 1);
-                    command.Parameters.AddWithValue("@hash", RandomString(filepath.Length));
-
-                        try
+                        using (var command = connection.CreateCommand())
                         {
+                            command.CommandText = "SELECT ID FROM Users WHERE Name = @username;";
+                            command.Parameters.AddWithValue("@username", username);
+
+                            var result = command.ExecuteScalar();
+                            if (result != null)
+                            {
+                                userId = Convert.ToInt32(result);
+                            }
+                            else
+                            {
+                                //User doesn't exist, create them as a regular user
+                                using (var insertUserCommand = connection.CreateCommand())
+                                {
+                                    insertUserCommand.CommandText = @"
+                                INSERT INTO Users (Name, IsAdmin) 
+                                VALUES (@username, 0);
+                                SELECT last_insert_rowid();";  // Get the new UserID
+
+                                    insertUserCommand.Parameters.AddWithValue("@username", username);
+                                    userId = Convert.ToInt32(insertUserCommand.ExecuteScalar());
+                                }
+                                Debug.WriteLine($"User '{username}' not found. Created new regular user with ID {userId}.");
+                            }
+                        }
+
+                        //Insert file into FILES table
+                        using (var command2 = connection.CreateCommand())
+                        {
+                            command2.CommandText = @"
+                        INSERT INTO FILES (FileName, DateAdded, UserIDWhoAdded, Hash) 
+                        VALUES (@filename, @dateadded, @useridwhoadded, @hash);";
+
+                            command2.Parameters.AddWithValue("@filename", data.FileName);
+                            command2.Parameters.AddWithValue("@dateadded", DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss"));
+                            command2.Parameters.AddWithValue("@useridwhoadded", userId);
+                            command2.Parameters.AddWithValue("@hash", fileHash);
+
                             command2.ExecuteNonQuery();
-                            Debug.WriteLine($"File '{filepath}' added successfully.");
+                        }
 
-                        }
-                        catch (SqliteException ex)
+                        //Insert blank entry into PERFORMANCES table
+                        using (var command3 = connection.CreateCommand())
                         {
-                            Debug.WriteLine($"Error: {ex.ToString()}");
+                            command3.CommandText = @"
+                        INSERT INTO PERFORMANCES (HashOfFileNameUsed, ResultIsEncrypted, Duration) 
+                        VALUES (@hash, @result, @duration);";  // Default encryption state = false (0)
+
+                            command3.Parameters.AddWithValue("@hash", fileHash);
+                            command3.Parameters.AddWithValue("@result", data.Encrypted.Contains("true")? true : false);
+                            command3.Parameters.AddWithValue("@duration", data.Duration);
+                            command3.ExecuteNonQuery();
                         }
+
+                        transaction.Commit(); //Commit changes
+                        Debug.WriteLine($"ENTRY '{data.FileName}' added successfully by user '{username}'.");
+                    }
+                    catch (SqliteException ex)
+                    {
+                        transaction.Rollback(); //Rollback changes on error
+                        Debug.WriteLine($"Error: {ex.ToString()}");
                     }
                 }
             }
         }
-        */
 
 
         /// <summary>

@@ -23,9 +23,10 @@ namespace PROIECT_CSD.Evenimente
             switch(alg)
             {
                 case "AES-128":
+                    DateTime time = DateTime.Now;
                     //trebuie iv generat 
                     //key si iv trebuie stocate in baza de date dar vazute doar de admini
-                    if(key.Length!=16)
+                    if (key.Length!=16)
                     {
                         MessageBox.Show("Key length must be 16 characters.","Key length error!");
                         return -1;
@@ -48,7 +49,8 @@ namespace PROIECT_CSD.Evenimente
                             inputFileStream.CopyTo(cryptoStream);
                         }
                     }
-                    MessageBox.Show("Cica criptez fisier cu aes-128 \nkey = " + key + " \nkey in bytes : " + keyBytes.ToString() + "\niv = " + myAES.IV.ToString(), "Treaba lui Victor");
+                    
+                    //MessageBox.Show("Cica criptez fisier cu aes-128 \nkey = " + key + " \nkey in bytes : " + keyBytes.ToString() + "\niv = " + myAES.IV.ToString(), "Treaba lui Victor");
                     item.EncryptionAlgorithm = "AES-128";
                     StringBuilder sb = new StringBuilder();
                     foreach (byte b in myAES.Key)
@@ -56,18 +58,17 @@ namespace PROIECT_CSD.Evenimente
                         sb.Append(b.ToString("x2"));
                     }
                     item.EncryptionKey = sb.ToString();
-                    EntryData encryptedEntryData;
+                    EntryData encryptedEntryData = new EntryData();
                     encryptedEntryData.Encrypted = "true";
                     encryptedEntryData.EncryptionAlgorithm = "AES-128";
                     encryptedEntryData.EncryptionKey = sb.ToString();
                     encryptedEntryData.FileFullPath = outputFullPath;
                     encryptedEntryData.FileName = Path.GetFileName(outputPath);
-                    AddNewFile(outputFullPath,Overview_Form.getUser());
-
+                    encryptedEntryData.Duration = (DateTime.Now - time).TotalSeconds.ToString();
+                    AddNewFile(encryptedEntryData,Overview_Form.getUser());
 
 
                     return 0;
-                    break;
 
                 default:
                     return -1;

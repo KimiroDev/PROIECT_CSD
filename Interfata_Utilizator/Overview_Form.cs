@@ -1,5 +1,6 @@
 using PROIECT_CSD.Date;
 using PROIECT_CSD.Interfata_Utilizator;
+using System.Diagnostics;
 
 namespace PROIECT_CSD
 {
@@ -108,8 +109,17 @@ namespace PROIECT_CSD
             };
 
             EncryptForm encryptForm = new(selectedfile);
+            Debug.WriteLine("new encrypt form based on " + selectedfile.FileName);
+            
             if (encryptForm.ShowDialog() == DialogResult.OK)
             {
+                Debug.WriteLine("am criptat un fisier");
+                RefreshListItems();
+            }
+            
+            if(!encryptForm.Visible)
+            {
+                Debug.WriteLine("gata encryptia");
                 RefreshListItems();
             }
         }
