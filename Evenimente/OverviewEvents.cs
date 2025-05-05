@@ -223,6 +223,7 @@ namespace PROIECT_CSD.Evenimente
         /// </summary>
         static public void AddNewFile(string filepath, string username)
         {
+            MessageBox.Show("AddNewFile(filepath,username)", "un add file");
             string dbPath = Path.Combine(Directory.GetCurrentDirectory(), "..\\..\\..\\hello.db");
             string connectionString = $"Data Source={dbPath};";
             string fileHash = RandomString(filepath.Length);
@@ -303,6 +304,7 @@ namespace PROIECT_CSD.Evenimente
 
         static public void AddNewFile(EntryData data, string username)
         {
+            MessageBox.Show("AddNewFile(entrydata,username)", "un add file");
             string dbPath = Path.Combine(Directory.GetCurrentDirectory(), "..\\..\\..\\hello.db");
             string connectionString = $"Data Source={dbPath};";
             string fileHash = RandomString(data.FileName.Length);
@@ -350,7 +352,7 @@ namespace PROIECT_CSD.Evenimente
                         INSERT INTO FILES (FileName, DateAdded, UserIDWhoAdded, Hash) 
                         VALUES (@filename, @dateadded, @useridwhoadded, @hash);";
 
-                            command2.Parameters.AddWithValue("@filename", data.FileName);
+                            command2.Parameters.AddWithValue("@filename", data.FileFullPath);
                             command2.Parameters.AddWithValue("@dateadded", DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss"));
                             command2.Parameters.AddWithValue("@useridwhoadded", userId);
                             command2.Parameters.AddWithValue("@hash", fileHash);

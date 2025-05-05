@@ -24,15 +24,17 @@ namespace PROIECT_CSD.Interfata_Utilizator
             {
                 Close();
             }
-
-            int result = Evenimente.Evenimente.EncryptButtonPressed(FileData, comboBox1.Text, textBox1.Text);
-            if (result != 0)
-                MessageBox.Show($"Encryption was unsuccessful. Error code {result}", "Error");
-
             else
             {
-                Text = "Encrypt File - Success";
-                EncryptButton.Text = "Close";
+                int result = Evenimente.Evenimente.EncryptButtonPressed(FileData, comboBox1.Text, textBox1.Text);
+                if (result != 0)
+                    MessageBox.Show($"Encryption was unsuccessful. Error code {result}", "Error");
+
+                else
+                {
+                    Text = "Encrypt File - Success";
+                    EncryptButton.Text = "Close";
+                }
             }
         }
     }
