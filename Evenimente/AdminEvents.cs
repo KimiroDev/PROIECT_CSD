@@ -50,16 +50,6 @@ namespace PROIECT_CSD.Evenimente
                 command.ExecuteNonQuery();
                 Debug.WriteLine("'Users' table created.");
 
-                command.CommandText = @"
-CREATE TABLE IF NOT EXISTS FILES (
-    `FileName` CHAR(50) NOT NULL,
-    `DateAdded` DATETIME NOT NULL,
-    `UserIDWhoAdded` INTEGER NOT NULL,
-    `Hash` VARCHAR(50) NOT NULL UNIQUE, -- FIX: Ensuring 'Hash' is UNIQUE
-    FOREIGN KEY(UserIDWhoAdded) REFERENCES USERS(ID)
-);";
-                command.ExecuteNonQuery();
-                Debug.WriteLine("'Files' table created.");
 
                 command.CommandText = @"
         CREATE TABLE IF NOT EXISTS ALGOS (
@@ -69,6 +59,19 @@ CREATE TABLE IF NOT EXISTS FILES (
         );";
                 command.ExecuteNonQuery();
                 Debug.WriteLine("'Algos' table created.");
+
+                command.CommandText = @"
+        CREATE TABLE IF NOT EXISTS FILES (
+            `FileName` CHAR(50) NOT NULL,
+            `DateAdded` DATETIME NOT NULL,
+            `UserIDWhoAdded` INTEGER NOT NULL,
+            `Algorithm` CHAR(50),
+            `Hash` VARCHAR(50) NOT NULL UNIQUE, -- FIX: Ensuring 'Hash' is UNIQUE
+            FOREIGN KEY(UserIDWhoAdded) REFERENCES USERS(ID),
+            FOREIGN KEY(Algorithm) REFERENCES ALGOS(ID)
+        );";
+                command.ExecuteNonQuery();
+                Debug.WriteLine("'Files' table created.");
 
                 command.CommandText = @"
         CREATE TABLE IF NOT EXISTS PERFORMANCES (
@@ -103,7 +106,7 @@ CREATE TABLE IF NOT EXISTS FILES (
                     string fileName = fileNames[random.Next(fileNames.Length)];
                     bool encrypted = random.Next(2) == 1; // True (1) or False (0)
                     string keyString = encrypted ? Guid.NewGuid().ToString("N").Substring(0, 16) : "-"; // Random 16-char key
-                    string algorithm = algorithms[random.Next(algorithms.Length-1)];
+                    string algorithm = algorithms[i]; //tf u mean random????
                     int duration = encrypted ? random.Next(10, 1000) : 0; // Random duration between 10 and 1000
                     string randomHash = RandomString(3);
                     int randomUserID = random.Next(3);

@@ -26,7 +26,7 @@ namespace PROIECT_CSD.Evenimente
             {
                 connection.Open();
 
-                // 🔹 First, get the UserID from the username
+                // First, get the UserID from the username
                 string userIdQuery = "SELECT ID FROM users WHERE Name = @username";
                 int userId = -1;
 
@@ -47,13 +47,18 @@ namespace PROIECT_CSD.Evenimente
                     }
                 }
 
-                // 🔹 Now, fetch files for the retrieved UserID
+                // Now, fetch files for the retrieved UserID
                 string selectQuery = @"
-        SELECT f.FileName, p.ResultIsEncrypted, p.KeyUsed, a.name, p.Duration, a.isReversable
-        FROM files f
-        JOIN performances p ON f.Hash = p.HashOfFileNameUsed
-        LEFT JOIN algos a ON p.AlgoIDUsed = a.ID
-        WHERE f.UserIDWhoAdded = @userId;";
+                    SELECT f.FileName, 
+                           p.ResultIsEncrypted, 
+                           p.KeyUsed, 
+                           a.name, 
+                           p.Duration, 
+                           a.isReversable
+                    FROM files f
+                    JOIN performances p ON f.Hash = p.HashOfFileNameUsed
+                    LEFT JOIN algos a ON p.AlgoIDUsed = a.ID
+                    WHERE f.UserIDWhoAdded = @userId;";
 
                 using (var command = connection.CreateCommand())
                 {
@@ -72,10 +77,10 @@ namespace PROIECT_CSD.Evenimente
                                 string fileName = reader.GetString(0);
                                 bool encrypted = reader.GetBoolean(1);
                                 string keyString = reader.IsDBNull(2) ? "N/A" : reader.GetString(2);
-                                string algorithm = reader.IsDBNull(2) ? "N/A" : reader.GetString(3);
+                                string algorithm = reader.IsDBNull(3) ? "N/A" : reader.GetString(3);
                                 double duration = reader.IsDBNull(4) ? 0.0 : reader.GetDouble(4);
-                                bool reversable = reader.IsDBNull(2) ? false : reader.GetBoolean(5);
-
+                                bool reversable = reader.IsDBNull(5) ? false : reader.GetBoolean(5);
+                                
                                 // Display the data
                                 Debug.WriteLine($"{fileName} | {encrypted} | {keyString} | {algorithm} | {duration} | {reversable}");
 
@@ -344,6 +349,48 @@ namespace PROIECT_CSD.Evenimente
                                 Debug.WriteLine($"User '{username}' not found. Created new regular user with ID {userId}.");
                             }
                         }
+                        int algoId=0;
+
+                        using (var command = connection.CreateCommand())
+                        {
+                            command.CommandText = "SELECT * FROM algos";
+
+                            using (var reader = command.ExecuteReader())
+                            {
+                                string output = "";
+
+                                while (reader.Read())
+                                {
+                                    for (int i = 0; i < reader.FieldCount; i++)
+                                    {
+                                        output += $"{reader.GetName(i)}: {reader.GetValue(i)}  ";
+                                    }
+                                    output += Environment.NewLine;
+                                }
+
+                                MessageBox.Show(output, "Algos Table Contents");
+                            }
+                        }
+                        // Get Algorithm ID
+                        using (var algoCommand = connection.CreateCommand())
+                        {
+                            algoCommand.CommandText = "SELECT ID FROM algos WHERE name = @algoName;";
+                            algoCommand.Parameters.AddWithValue("@algoName", data.EncryptionAlgorithm);
+
+                            var algoResult = algoCommand.ExecuteScalar();
+
+                            MessageBox.Show(algoResult.ToString(),"wopea");
+
+                            if (algoResult != null)
+                            {
+                                algoId = Convert.ToInt32(algoResult);
+                            }
+                            else
+                            {
+                                MessageBox.Show($"Algorithm '{data.EncryptionAlgorithm}' not found. No AlgoID used.","Algo error");
+                                return;
+                            }
+                        }
 
                         //Insert file into FILES table
                         using (var command2 = connection.CreateCommand())
@@ -355,6 +402,7 @@ namespace PROIECT_CSD.Evenimente
                             command2.Parameters.AddWithValue("@filename", data.FileFullPath);
                             command2.Parameters.AddWithValue("@dateadded", DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss"));
                             command2.Parameters.AddWithValue("@useridwhoadded", userId);
+                            command2.Parameters.AddWithValue("@Algorithm", algoId);
                             command2.Parameters.AddWithValue("@hash", fileHash);
 
                             command2.ExecuteNonQuery();
