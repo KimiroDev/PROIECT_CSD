@@ -3,6 +3,7 @@ using PROIECT_CSD.Date;
 using PROIECT_CSD.Interfata_Utilizator;
 using System.Security.Cryptography;
 using System.Text;
+using static System.Windows.Forms.VisualStyles.VisualStyleElement.TaskbarClock;
 
 
 namespace PROIECT_CSD.Evenimente
@@ -78,6 +79,8 @@ namespace PROIECT_CSD.Evenimente
             switch (item.EncryptionAlgorithm)
             {
                 case "AES-128":
+
+                    DateTime time = DateTime.Now;
                     Aes myAES = Aes.Create();
 
                     byte[] keyBytes;
@@ -93,6 +96,9 @@ namespace PROIECT_CSD.Evenimente
 
                     myAES.Key = keyBytes;
 
+
+                    string decryptedPath = item.FileFullPath.Replace(".encrypted", ".decrypted");
+
                     using (FileStream inputFileStream = new FileStream(item.FileFullPath, FileMode.Open, FileAccess.Read))
                     {
                         // Read the IV (first 16 bytes)
@@ -100,7 +106,6 @@ namespace PROIECT_CSD.Evenimente
                         inputFileStream.Read(iv, 0, 16);
                         myAES.IV = iv;
 
-                        string decryptedPath = item.FileFullPath.Replace(".encrypted", ".decrypted");
 
                         using (FileStream outputFileStream = new FileStream(decryptedPath, FileMode.Create, FileAccess.Write))
                         using (CryptoStream cryptoStream = new CryptoStream(outputFileStream, myAES.CreateDecryptor(), CryptoStreamMode.Write))
@@ -108,6 +113,15 @@ namespace PROIECT_CSD.Evenimente
                             inputFileStream.CopyTo(cryptoStream);
                         }
                     }
+                    EntryData decryptedEntryData = new EntryData();
+                    decryptedEntryData.Encrypted = "false";
+                    decryptedEntryData.EncryptionAlgorithm = "AES-128";
+                    decryptedEntryData.EncryptionKey = "";
+                    decryptedEntryData.FileFullPath = decryptedPath;
+                    decryptedEntryData.FileName = Path.GetFileName(decryptedPath);
+                    decryptedEntryData.Duration = (DateTime.Now - time).TotalSeconds.ToString();
+
+                    AddNewFile(decryptedEntryData, Overview_Form.getUser());
 
                     return 0;
 
