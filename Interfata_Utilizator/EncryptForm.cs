@@ -1,4 +1,5 @@
 ﻿using PROIECT_CSD.Date;
+using System.Security.Cryptography;
 
 namespace PROIECT_CSD.Interfata_Utilizator
 {
@@ -36,6 +37,35 @@ namespace PROIECT_CSD.Interfata_Utilizator
                     EncryptButton.Text = "Close";
                 }
             }
+        }
+
+        private void EncryptForm_Load(object sender, EventArgs e)
+        {
+            ImageList imageList = new ImageList();
+            imageList.Images.Add("ok", Properties.Resources.rand);
+            button1.ImageList = imageList;
+            button1.ImageKey = "ok";
+        }
+
+        private void button1_Click(object sender, EventArgs e)
+        {
+            textBox1.Text = GenerateRandomString(16);
+        }
+
+        private string GenerateRandomString(int length)
+        {
+            const string chars = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
+            var stringChars = new char[length];
+            using (var rng = RandomNumberGenerator.Create())
+            {
+                byte[] data = new byte[length];
+                rng.GetBytes(data);
+                for (int i = 0; i < stringChars.Length; i++)
+                {
+                    stringChars[i] = chars[data[i] % chars.Length];
+                }
+            }
+            return new string(stringChars);
         }
     }
 }

@@ -62,28 +62,30 @@ namespace PROIECT_CSD.Interfata_Utilizator
             AlgLabel = new Label();
             KeyLabel = new Label();
             EncryptButton = new Button();
+            button1 = new Button();
             SuspendLayout();
             // 
             // comboBox1
             // 
+            comboBox1.DropDownStyle = ComboBoxStyle.DropDownList;
             comboBox1.FormattingEnabled = true;
             comboBox1.Items.AddRange(new object[] { "AES-128", "AES-128", "AES-128", "AES-128" });
-            comboBox1.Location = new Point(121, 12);
+            comboBox1.Location = new Point(82, 12);
             comboBox1.Name = "comboBox1";
-            comboBox1.Size = new Size(121, 23);
+            comboBox1.Size = new Size(152, 23);
             comboBox1.TabIndex = 0;
             // 
             // textBox1
             // 
-            textBox1.Location = new Point(121, 41);
+            textBox1.Location = new Point(82, 40);
             textBox1.Name = "textBox1";
-            textBox1.Size = new Size(100, 23);
+            textBox1.Size = new Size(152, 23);
             textBox1.TabIndex = 1;
             // 
             // AlgLabel
             // 
             AlgLabel.AutoSize = true;
-            AlgLabel.Location = new Point(51, 15);
+            AlgLabel.Location = new Point(12, 15);
             AlgLabel.Name = "AlgLabel";
             AlgLabel.Size = new Size(64, 15);
             AlgLabel.TabIndex = 2;
@@ -92,7 +94,7 @@ namespace PROIECT_CSD.Interfata_Utilizator
             // KeyLabel
             // 
             KeyLabel.AutoSize = true;
-            KeyLabel.Location = new Point(86, 44);
+            KeyLabel.Location = new Point(47, 44);
             KeyLabel.Name = "KeyLabel";
             KeyLabel.Size = new Size(29, 15);
             KeyLabel.TabIndex = 3;
@@ -108,11 +110,22 @@ namespace PROIECT_CSD.Interfata_Utilizator
             EncryptButton.UseVisualStyleBackColor = true;
             EncryptButton.Click += EncryptButton_Click;
             // 
+            // button1
+            // 
+            button1.FlatStyle = FlatStyle.Flat;
+            button1.Location = new Point(240, 40);
+            button1.Name = "button1";
+            button1.Size = new Size(24, 23);
+            button1.TabIndex = 5;
+            button1.UseVisualStyleBackColor = true;
+            button1.Click += button1_Click;
+            // 
             // EncryptForm
             // 
             AutoScaleDimensions = new SizeF(7F, 15F);
             AutoScaleMode = AutoScaleMode.Font;
             ClientSize = new Size(318, 111);
+            Controls.Add(button1);
             Controls.Add(EncryptButton);
             Controls.Add(KeyLabel);
             Controls.Add(AlgLabel);
@@ -120,6 +133,7 @@ namespace PROIECT_CSD.Interfata_Utilizator
             Controls.Add(comboBox1);
             Name = "EncryptForm";
             Text = "Encrypt File";
+            Load += EncryptForm_Load;
             ResumeLayout(false);
             PerformLayout();
         }
@@ -131,5 +145,6 @@ namespace PROIECT_CSD.Interfata_Utilizator
         private Label AlgLabel;
         private Label KeyLabel;
         private Button EncryptButton;
+        private Button button1;
     }
 }
