@@ -49,7 +49,16 @@ namespace PROIECT_CSD.Interfata_Utilizator
 
         private void button1_Click(object sender, EventArgs e)
         {
-            textBox1.Text = GenerateRandomString(16);
+            if (comboBox1.SelectedItem is null)
+            {
+                MessageBox.Show("Selectati un algoritm de criptare.", "Error");
+                return;
+            }
+            else
+            if (comboBox1.SelectedItem.ToString() == "AES-128")
+                textBox1.Text = GenerateRandomString(16);
+            else if (comboBox1.SelectedItem.ToString() == "RSA")
+                textBox1.Text = GenerateRandomString(256);
         }
 
         private string GenerateRandomString(int length)
@@ -66,6 +75,12 @@ namespace PROIECT_CSD.Interfata_Utilizator
                 }
             }
             return new string(stringChars);
+        }
+
+        private void comboBox1_SelectedIndexChanged(object sender, EventArgs e)
+        {
+            if (comboBox1.SelectedItem is not null) button1.Enabled = true;
+            else button1.Enabled = false;
         }
     }
 }

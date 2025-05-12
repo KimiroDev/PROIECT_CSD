@@ -69,11 +69,12 @@ namespace PROIECT_CSD.Interfata_Utilizator
             // 
             comboBox1.DropDownStyle = ComboBoxStyle.DropDownList;
             comboBox1.FormattingEnabled = true;
-            comboBox1.Items.AddRange(new object[] { "AES-128", "AES-128", "AES-128", "AES-128" });
+            comboBox1.Items.AddRange(new object[] { "AES-128", "RSA" });
             comboBox1.Location = new Point(82, 12);
             comboBox1.Name = "comboBox1";
             comboBox1.Size = new Size(152, 23);
             comboBox1.TabIndex = 0;
+            comboBox1.SelectedIndexChanged += comboBox1_SelectedIndexChanged;
             // 
             // textBox1
             // 
@@ -112,6 +113,7 @@ namespace PROIECT_CSD.Interfata_Utilizator
             // 
             // button1
             // 
+            button1.Enabled = false;
             button1.FlatStyle = FlatStyle.Flat;
             button1.Location = new Point(240, 40);
             button1.Name = "button1";
