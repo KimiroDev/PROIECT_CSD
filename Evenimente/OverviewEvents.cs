@@ -396,13 +396,14 @@ namespace PROIECT_CSD.Evenimente
                         using (var command2 = connection.CreateCommand())
                         {
                             command2.CommandText = @"
-                        INSERT INTO FILES (FileName, DateAdded, UserIDWhoAdded, Hash) 
-                        VALUES (@filename, @dateadded, @useridwhoadded, @hash);";
+                        INSERT INTO FILES (FileName, DateAdded,Algorithm,Key, UserIDWhoAdded, Hash) 
+                        VALUES (@filename, @dateadded, @Algorithm, @Key, @useridwhoadded, @hash);";
 
                             command2.Parameters.AddWithValue("@filename", data.FileFullPath);
                             command2.Parameters.AddWithValue("@dateadded", DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss"));
                             command2.Parameters.AddWithValue("@useridwhoadded", userId);
                             command2.Parameters.AddWithValue("@Algorithm", algoId);
+                            command2.Parameters.AddWithValue("@Key", data.EncryptionKey);
                             command2.Parameters.AddWithValue("@hash", fileHash);
 
                             command2.ExecuteNonQuery();
@@ -412,12 +413,13 @@ namespace PROIECT_CSD.Evenimente
                         using (var command3 = connection.CreateCommand())
                         {
                             command3.CommandText = @"
-                                INSERT INTO PERFORMANCES (HashOfFileNameUsed, ResultIsEncrypted, Duration, AlgoIDUsed) 
-                                VALUES (@hash, @result, @duration, @algoId);";  // Default encryption state = false (0)
+                                INSERT INTO PERFORMANCES (HashOfFileNameUsed, ResultIsEncrypted,KeyUsed, Duration, AlgoIDUsed) 
+                                VALUES (@hash, @result, @key, @duration, @algoId);";  // Default encryption state = false (0)
 
                             command3.Parameters.AddWithValue("@hash", fileHash);
                             command3.Parameters.AddWithValue("@result", data.Encrypted.Contains("true")? true : false);
                             command3.Parameters.AddWithValue("@duration", data.Duration);
+                            command3.Parameters.AddWithValue("@key", data.EncryptionKey);
                             command3.Parameters.AddWithValue("@algoId", algoId);
                             command3.ExecuteNonQuery();
                         }

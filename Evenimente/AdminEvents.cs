@@ -66,6 +66,7 @@ namespace PROIECT_CSD.Evenimente
             `DateAdded` DATETIME NOT NULL,
             `UserIDWhoAdded` INTEGER NOT NULL,
             `Algorithm` CHAR(50),
+            `Key` CHAR(100),
             `Hash` VARCHAR(50) NOT NULL UNIQUE, -- FIX: Ensuring 'Hash' is UNIQUE
             FOREIGN KEY(UserIDWhoAdded) REFERENCES USERS(ID),
             FOREIGN KEY(Algorithm) REFERENCES ALGOS(ID)
