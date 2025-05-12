@@ -64,6 +64,47 @@ namespace PROIECT_CSD.Evenimente
 
                     return 0;
 
+                case "RSA":
+                    DateTime rsaTime = DateTime.Now;
+
+                    // Generate a new RSA key pair
+                    using (RSA rsa = RSA.Create(2048))
+                    {
+                        RSAParameters publicKey = rsa.ExportParameters(false);
+                        RSAParameters privateKey = rsa.ExportParameters(true);
+
+                        string privateKeyBase64 = Convert.ToBase64String(rsa.ExportRSAPrivateKey());
+
+                        byte[] fileBytes = File.ReadAllBytes(item.FileFullPath);
+                        byte[] encryptedBytes;
+
+                        try
+                        {
+                            encryptedBytes = rsa.Encrypt(fileBytes, RSAEncryptionPadding.OaepSHA256);
+                        }
+                        catch (CryptographicException)
+                        {
+                            MessageBox.Show("File too large to encrypt with RSA directly. Use hybrid encryption.", "RSA Error");
+                            return -1;
+                        }
+
+                        string outputPathRSA = item.FileFullPath + ".encrypted";
+
+                        File.WriteAllBytes(outputPathRSA, encryptedBytes);
+
+                        EntryData rsaEntryData = new EntryData();
+                        rsaEntryData.Encrypted = "true";
+                        rsaEntryData.EncryptionAlgorithm = "RSA";
+                        rsaEntryData.EncryptionKey = privateKeyBase64; 
+                        rsaEntryData.FileFullPath = outputPathRSA;
+                        rsaEntryData.FileName = Path.GetFileName(outputPathRSA);
+                        rsaEntryData.Duration = (DateTime.Now - rsaTime).TotalSeconds.ToString();
+
+                        AddNewFile(rsaEntryData, Overview_Form.getUser());
+
+                        return 0;
+                    }
+
                 default:
                     return -1;
             }
@@ -122,6 +163,43 @@ namespace PROIECT_CSD.Evenimente
                     decryptedEntryData.Duration = (DateTime.Now - time).TotalSeconds.ToString();
 
                     AddNewFile(decryptedEntryData, Overview_Form.getUser());
+
+                    return 0;
+
+                case "RSA":
+                    DateTime rsaDecryptTime = DateTime.Now;
+
+                    byte[] encryptedData = File.ReadAllBytes(item.FileFullPath);
+                    byte[] decryptedData;
+
+                    try
+                    {
+                        using (RSA rsa = RSA.Create())
+                        {
+                            byte[] privateKeyBytes = Convert.FromBase64String(item.EncryptionKey);
+                            rsa.ImportRSAPrivateKey(privateKeyBytes, out _);
+
+                            decryptedData = rsa.Decrypt(encryptedData, RSAEncryptionPadding.OaepSHA256);
+                        }
+                    }
+                    catch (Exception ex)
+                    {
+                        MessageBox.Show("RSA Decryption failed: " + ex.Message, "RSA Error");
+                        return -1;
+                    }
+
+                    string rsaDecryptedPath = item.FileFullPath.Substring(0, item.FileFullPath.LastIndexOf(".encrypted")) + ".decrypted";
+                    File.WriteAllBytes(rsaDecryptedPath, decryptedData);
+
+                    EntryData rsaDecryptedEntryData = new EntryData();
+                    rsaDecryptedEntryData.Encrypted = "false";
+                    rsaDecryptedEntryData.EncryptionAlgorithm = "RSA";
+                    rsaDecryptedEntryData.EncryptionKey = "";
+                    rsaDecryptedEntryData.FileFullPath = rsaDecryptedPath;
+                    rsaDecryptedEntryData.FileName = Path.GetFileName(rsaDecryptedPath);
+                    rsaDecryptedEntryData.Duration = (DateTime.Now - rsaDecryptTime).TotalSeconds.ToString();
+
+                    AddNewFile(rsaDecryptedEntryData, Overview_Form.getUser());
 
                     return 0;
 

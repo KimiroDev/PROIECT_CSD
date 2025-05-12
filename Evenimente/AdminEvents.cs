@@ -98,7 +98,7 @@ namespace PROIECT_CSD.Evenimente
                 Debug.WriteLine($"User 'Piratu' has ID: {piratuUserID}");
 
                 string[] fileNames = { "pinar.txt", "secret.doc", "data.csv", "notes.pdf", "report.txt" };
-                string[] algorithms = { "AES-256", "RSA-2048", "ChaCha20", "AES-128", "RSA-1024" };
+                string[] algorithms = { "AES-256", "RSA", "ChaCha20", "AES-128", "RSA-1024" };
 
                 Random random = new Random();
 
