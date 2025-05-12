@@ -97,7 +97,7 @@ namespace PROIECT_CSD.Evenimente
                     myAES.Key = keyBytes;
 
 
-                    string decryptedPath = item.FileFullPath.Replace(".encrypted", ".decrypted");
+                    string decryptedPath = item.FileFullPath.Substring(0, item.FileFullPath.LastIndexOf(".encrypted")) + ".decrypted";
 
                     using (FileStream inputFileStream = new FileStream(item.FileFullPath, FileMode.Open, FileAccess.Read))
                     {
