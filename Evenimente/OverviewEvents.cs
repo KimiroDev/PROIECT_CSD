@@ -412,12 +412,13 @@ namespace PROIECT_CSD.Evenimente
                         using (var command3 = connection.CreateCommand())
                         {
                             command3.CommandText = @"
-                        INSERT INTO PERFORMANCES (HashOfFileNameUsed, ResultIsEncrypted, Duration) 
-                        VALUES (@hash, @result, @duration);";  // Default encryption state = false (0)
+                                INSERT INTO PERFORMANCES (HashOfFileNameUsed, ResultIsEncrypted, Duration, AlgoIDUsed) 
+                                VALUES (@hash, @result, @duration, @algoId);";  // Default encryption state = false (0)
 
                             command3.Parameters.AddWithValue("@hash", fileHash);
                             command3.Parameters.AddWithValue("@result", data.Encrypted.Contains("true")? true : false);
                             command3.Parameters.AddWithValue("@duration", data.Duration);
+                            command3.Parameters.AddWithValue("@algoId", algoId);
                             command3.ExecuteNonQuery();
                         }
 
